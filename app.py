@@ -731,6 +731,29 @@ def admin_page():
 
 
 # ============================================================
+#  ADMIN — one-time setup route (secured by ADMIN_SETUP_KEY env var)
+# ============================================================
+@app.route("/admin/setup")
+def admin_setup():
+    setup_key = os.getenv("ADMIN_SETUP_KEY", "")
+    provided  = request.args.get("key", "")
+    email     = request.args.get("email", "")
+    if not setup_key:
+        return "ADMIN_SETUP_KEY environment variable not set.", 403
+    if provided != setup_key:
+        return "Invalid key.", 403
+    if not email:
+        return "Provide ?email=your@email.com&key=YOUR_KEY", 400
+    with sqlite3.connect(DB_PATH) as con:
+        row = con.execute("SELECT id FROM users WHERE LOWER(email)=LOWER(?)", (email,)).fetchone()
+        if not row:
+            return f"User '{email}' not found. Register first at /login.", 404
+        con.execute("UPDATE users SET is_admin=1 WHERE id=?", (row[0],))
+        con.commit()
+    return f"✅ User '{email}' is now admin. You can login at /admin/login"
+
+
+# ============================================================
 #  ADMIN — login endpoint
 # ============================================================
 @app.route("/admin/login", methods=["POST"])
