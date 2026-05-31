@@ -55,7 +55,8 @@ DB_PATH = os.path.abspath(os.path.join(DATA_DIR, "batisense.db"))
 class User(UserMixin):
     def __init__(self, row):
         (self.id, self.first_name, self.last_name, self.email,
-         self.password, self.street, self.city, self.zip_code, self.created_at) = row
+         self.password, self.street, self.city, self.zip_code,
+         self.created_at, self.is_admin, self.last_seen) = row
 
     def to_dict(self):
         return {
@@ -67,13 +68,15 @@ class User(UserMixin):
             "city": self.city,
             "zip_code": self.zip_code,
             "created_at": self.created_at,
+            "is_admin": bool(self.is_admin),
         }
 
     @staticmethod
     def get_by_id(user_id):
         with sqlite3.connect(DB_PATH) as con:
             row = con.execute(
-                "SELECT id,first_name,last_name,email,password,street,city,zip_code,created_at "
+                "SELECT id,first_name,last_name,email,password,street,city,zip_code,"
+                "created_at,COALESCE(is_admin,0),last_seen "
                 "FROM users WHERE id=?", (user_id,)
             ).fetchone()
         return User(row) if row else None
@@ -82,7 +85,8 @@ class User(UserMixin):
     def get_by_email(email):
         with sqlite3.connect(DB_PATH) as con:
             row = con.execute(
-                "SELECT id,first_name,last_name,email,password,street,city,zip_code,created_at "
+                "SELECT id,first_name,last_name,email,password,street,city,zip_code,"
+                "created_at,COALESCE(is_admin,0),last_seen "
                 "FROM users WHERE LOWER(email)=LOWER(?)", (email,)
             ).fetchone()
         return User(row) if row else None
@@ -110,9 +114,17 @@ def init_db():
                 street     TEXT,
                 city       TEXT,
                 zip_code   TEXT,
-                created_at TEXT DEFAULT (datetime('now'))
+                created_at TEXT DEFAULT (datetime('now')),
+                is_admin   INTEGER NOT NULL DEFAULT 0,
+                last_seen  TEXT
             )
         """)
+        # Migrate existing DB: add columns if missing
+        for col, definition in [("is_admin", "INTEGER NOT NULL DEFAULT 0"), ("last_seen", "TEXT")]:
+            try:
+                con.execute(f"ALTER TABLE users ADD COLUMN {col} {definition}")
+            except Exception:
+                pass
         con.execute("""
             CREATE TABLE IF NOT EXISTS api_tokens (
                 id         INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -315,6 +327,10 @@ def login():
     if not user or not bcrypt.check_password_hash(user.password, password):
         return jsonify({"error": "E-mail ou mot de passe incorrect."}), 401
     login_user(user, remember=True)
+    now = datetime.now(timezone.utc).isoformat(timespec="seconds")
+    with sqlite3.connect(DB_PATH) as con:
+        con.execute("UPDATE users SET last_seen=? WHERE id=?", (now, user.id))
+        con.commit()
     return jsonify({"message": "Connexion reussie.", "user": user.to_dict()}), 200
 
 
@@ -669,6 +685,137 @@ def water_meter_latest():
         "unit":      "m³",
         "timestamp": row["timestamp"]
     })
+
+
+# ============================================================
+#  ADMIN — helper decorator
+# ============================================================
+def admin_required(f):
+    from functools import wraps
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if not current_user.is_authenticated:
+            return jsonify({"error": "Non authentifie."}), 401
+        if not current_user.is_admin:
+            return jsonify({"error": "Acces refuse."}), 403
+        return f(*args, **kwargs)
+    return decorated
+
+
+# ============================================================
+#  ADMIN — page routes
+# ============================================================
+@app.route("/admin/login")
+def admin_login_page():
+    if current_user.is_authenticated and current_user.is_admin:
+        return redirect("/admin")
+    return send_file("Admin_login.html")
+
+
+@app.route("/admin")
+@login_required
+def admin_page():
+    if not current_user.is_admin:
+        return redirect("/dashboard")
+    return send_file("Admin.html")
+
+
+# ============================================================
+#  ADMIN — login endpoint
+# ============================================================
+@app.route("/admin/login", methods=["POST"])
+def admin_login():
+    data     = request.get_json(silent=True) or {}
+    email    = normalize_email(data.get("email", ""))
+    password = str(data.get("password", ""))
+    user     = User.get_by_email(email)
+    if not user or not bcrypt.check_password_hash(user.password, password):
+        return jsonify({"error": "E-mail ou mot de passe incorrect."}), 401
+    if not user.is_admin:
+        return jsonify({"error": "Acces refuse. Compte non administrateur."}), 403
+    login_user(user, remember=True)
+    now = datetime.now(timezone.utc).isoformat(timespec="seconds")
+    with sqlite3.connect(DB_PATH) as con:
+        con.execute("UPDATE users SET last_seen=? WHERE id=?", (now, user.id))
+        con.commit()
+    return jsonify({"ok": True, "user": user.to_dict()}), 200
+
+
+# ============================================================
+#  ADMIN — API routes
+# ============================================================
+@app.route("/api/admin/stats")
+@admin_required
+def admin_stats():
+    with sqlite3.connect(DB_PATH) as con:
+        total_users    = con.execute("SELECT COUNT(*) FROM users").fetchone()[0]
+        total_readings = con.execute("SELECT COUNT(*) FROM readings").fetchone()[0]
+        active_alerts  = con.execute("SELECT COUNT(*) FROM alerts WHERE acked=0").fetchone()[0]
+        total_tokens   = con.execute("SELECT COUNT(*) FROM api_tokens").fetchone()[0]
+    return jsonify({
+        "total_users":    total_users,
+        "total_readings": total_readings,
+        "active_alerts":  active_alerts,
+        "total_tokens":   total_tokens,
+    })
+
+
+@app.route("/api/admin/users")
+@admin_required
+def admin_list_users():
+    with sqlite3.connect(DB_PATH) as con:
+        con.row_factory = sqlite3.Row
+        users = con.execute(
+            "SELECT id, first_name, last_name, email, street, city, zip_code, "
+            "created_at, COALESCE(is_admin,0) as is_admin, last_seen FROM users ORDER BY id"
+        ).fetchall()
+        result = []
+        for u in users:
+            uid = u["id"]
+            readings_count = con.execute(
+                "SELECT COUNT(*) FROM readings WHERE user_id=?", (uid,)
+            ).fetchone()[0]
+            alerts_count = con.execute(
+                "SELECT COUNT(*) FROM alerts WHERE user_id=? AND acked=0", (uid,)
+            ).fetchone()[0]
+            tokens_count = con.execute(
+                "SELECT COUNT(*) FROM api_tokens WHERE user_id=?", (uid,)
+            ).fetchone()[0]
+            result.append({
+                "id":             uid,
+                "first_name":     u["first_name"],
+                "last_name":      u["last_name"],
+                "email":          u["email"],
+                "street":         u["street"],
+                "city":           u["city"],
+                "zip_code":       u["zip_code"],
+                "created_at":     u["created_at"],
+                "is_admin":       bool(u["is_admin"]),
+                "last_seen":      u["last_seen"],
+                "readings_count": readings_count,
+                "alerts_count":   alerts_count,
+                "tokens_count":   tokens_count,
+            })
+    return jsonify(result)
+
+
+@app.route("/api/admin/users/<int:user_id>", methods=["DELETE"])
+@admin_required
+def admin_delete_user(user_id):
+    if user_id == current_user.id:
+        return jsonify({"error": "Impossible de supprimer votre propre compte."}), 400
+    with sqlite3.connect(DB_PATH) as con:
+        row = con.execute("SELECT is_admin FROM users WHERE id=?", (user_id,)).fetchone()
+        if not row:
+            return jsonify({"error": "Utilisateur introuvable."}), 404
+        if row[0]:
+            return jsonify({"error": "Impossible de supprimer un administrateur."}), 403
+        con.execute("DELETE FROM readings   WHERE user_id=?", (user_id,))
+        con.execute("DELETE FROM alerts     WHERE user_id=?", (user_id,))
+        con.execute("DELETE FROM api_tokens WHERE user_id=?", (user_id,))
+        con.execute("DELETE FROM users      WHERE id=?",      (user_id,))
+        con.commit()
+    return jsonify({"ok": True})
 
 
 # ============================================================
