@@ -19,13 +19,11 @@ from flask_cors import CORS
 from flask_login import LoginManager, UserMixin, login_required, login_user, logout_user, current_user
 from flask_bcrypt import Bcrypt
 from flask import send_from_directory
-from werkzeug.middleware.proxy_fix import ProxyFix
 
 # ============================================================
 #  App & extensions
 # ============================================================
 app = Flask(__name__)
-app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
 
 def _cors_origins():
     raw = os.getenv("CORS_ORIGINS", "").strip()
@@ -37,7 +35,7 @@ CORS(app, supports_credentials=True, origins=_cors_origins())
 
 app.config["SECRET_KEY"]              = os.getenv("SECRET_KEY", "batisense_secret_key_123456")
 app.config["SESSION_COOKIE_HTTPONLY"] = True
-app.config["SESSION_COOKIE_SAMESITE"] = os.getenv("SESSION_COOKIE_SAMESITE", "Lax")
+app.config["SESSION_COOKIE_SAMESITE"] = os.getenv("SESSION_COOKIE_SAMESITE", "None")
 app.config["SESSION_COOKIE_SECURE"]   = os.getenv("SESSION_COOKIE_SECURE", "True") == "True"
 
 bcrypt        = Bcrypt(app)
@@ -45,6 +43,8 @@ login_manager = LoginManager(app)
 login_manager.login_view    = "login_page"
 login_manager.login_message = None
 
+# Database stored in a persistent volume when deployed on Railway.
+# DATA_DIR should point to a mounted volume such as /data.
 DATA_DIR = os.getenv("DATA_DIR") or ("/data" if os.name != "nt" else ".")
 os.makedirs(DATA_DIR, exist_ok=True)
 DB_PATH = os.path.abspath(os.path.join(DATA_DIR, "batisense.db"))
@@ -55,8 +55,7 @@ DB_PATH = os.path.abspath(os.path.join(DATA_DIR, "batisense.db"))
 class User(UserMixin):
     def __init__(self, row):
         (self.id, self.first_name, self.last_name, self.email,
-         self.password, self.street, self.city, self.zip_code,
-         self.created_at, self.is_admin) = row
+         self.password, self.street, self.city, self.zip_code, self.created_at) = row
 
     def to_dict(self):
         return {
@@ -68,15 +67,13 @@ class User(UserMixin):
             "city": self.city,
             "zip_code": self.zip_code,
             "created_at": self.created_at,
-            "is_admin": bool(self.is_admin),
         }
 
     @staticmethod
     def get_by_id(user_id):
         with sqlite3.connect(DB_PATH) as con:
             row = con.execute(
-                # Both get_by_id and get_by_email — add is_admin at the end of SELECT:
-                "SELECT id,first_name,last_name,email,password,street,city,zip_code,created_at,is_admin "
+                "SELECT id,first_name,last_name,email,password,street,city,zip_code,created_at "
                 "FROM users WHERE id=?", (user_id,)
             ).fetchone()
         return User(row) if row else None
@@ -97,7 +94,7 @@ def load_user(user_id):
 
 
 # ============================================================
-#  Database init
+#  Database init — called at startup
 # ============================================================
 def init_db():
     with sqlite3.connect(DB_PATH) as con:
@@ -196,8 +193,31 @@ THRESHOLDS = {
     "gas_detected":    {"eq": 1,                "level": "danger"},
     "structure_alert": {"eq": 1,                "level": "danger"},
     "door_open":       {"eq": 1,                "level": "info"},
-    "water_meter":     {"min": 0, "max": 99999, "level": "info"},
+    "water_meter":     {"min": 0, "max": 99999, "level": "info"},   # accepts any positive reading
 }
+
+SENSOR_ALIASES = {
+    "electricity": {
+        "daily_consumption", "consumption", "consommation", "total",
+        "energy", "kwh", "power", "watt", "watts", "current", "amp", "amps", "ampere", "ampereh"
+    },
+    "water": {
+        "daily_consumption", "consumption", "consommation", "flow", "volume", "liters", "litres"
+    },
+    "gas_node": {
+        "daily_consumption", "consumption", "consommation", "gas", "volume"
+    },
+}
+
+
+def normalize_sensor_type(node_id, sensor_type):
+    sensor = str(sensor_type or "").strip().lower()
+    if sensor in {"value", "reading", "reading_value", "consumption", "consommation"}:
+        return "daily_consumption"
+    aliases = SENSOR_ALIASES.get(str(node_id or "").strip().lower(), set())
+    if sensor in aliases:
+        return "daily_consumption"
+    return sensor
 
 
 def check_and_raise_alert(db, user_id, node_id, sensor_type, value, timestamp):
@@ -386,7 +406,7 @@ def delete_token(token_id):
 
 
 # ============================================================
-#  Pi LOGIN
+#  Pi LOGIN — Pi calls this once at startup
 # ============================================================
 @app.route("/api/pi/login", methods=["POST"])
 def pi_login():
@@ -414,7 +434,7 @@ def pi_login():
 
 
 # ============================================================
-#  Pi DATA
+#  Pi DATA — Pi sends sensor readings
 # ============================================================
 @app.route("/api/pi/data", methods=["POST"])
 @require_token
@@ -434,6 +454,7 @@ def pi_receive_data():
     db = sqlite3.connect(DB_PATH)
     try:
         for sensor_type, value in sensors.items():
+            sensor_type = normalize_sensor_type(node_id, sensor_type)
             db.execute(
                 "INSERT INTO readings (node_id,sensor_type,value,timestamp,user_id) VALUES (?,?,?,?,?)",
                 (node_id, sensor_type, float(value), timestamp, user.id)
@@ -626,7 +647,7 @@ def health():
 
 
 # ============================================================
-#  WATER METER
+#  WATER METER — dedicated read endpoint (public for quick check)
 # ============================================================
 @app.route("/api/water_meter/latest")
 @login_required
@@ -651,7 +672,7 @@ def water_meter_latest():
 
 
 # ============================================================
-#  BOOT
+#  BOOT — init DB then start server
 # ============================================================
 init_db()
 
