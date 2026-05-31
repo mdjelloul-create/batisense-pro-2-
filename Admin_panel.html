@@ -219,7 +219,7 @@
   <span class="nav-brand">⚙️ BatiSense Admin</span>
   <div class="nav-right">
     <span id="adminEmail"></span>
-    <a href="/dashboard" style="color:var(--accent);text-decoration:none;font-size:13px;">← Dashboard</a>
+    
     <button class="btn-logout" onclick="logout()">Déconnexion</button>
   </div>
 </nav>
@@ -304,8 +304,8 @@
     tbody.innerHTML = `<tr class="state-row"><td colspan="10"><span class="spinner"></span>Chargement…</td></tr>`;
     try {
       const r = await fetch("/api/admin/users", { credentials: "include" });
-      if (r.status === 403) {
-        window.location.href = "/dashboard";
+      if (r.status === 403 || r.status === 401) {
+        window.location.href = "/admin/login";
         return;
       }
       allUsers = await r.json();
