@@ -56,7 +56,7 @@ class User(UserMixin):
     def __init__(self, row):
         (self.id, self.first_name, self.last_name, self.email,
          self.password, self.street, self.city, self.zip_code,
-         self.created_at, self.is_admin, self.last_seen) = row
+         self.created_at, self.last_seen) = row
 
     def to_dict(self):
         return {
@@ -68,7 +68,6 @@ class User(UserMixin):
             "city": self.city,
             "zip_code": self.zip_code,
             "created_at": self.created_at,
-            "is_admin": bool(self.is_admin),
         }
 
     @staticmethod
@@ -76,8 +75,7 @@ class User(UserMixin):
         with sqlite3.connect(DB_PATH) as con:
             row = con.execute(
                 "SELECT id,first_name,last_name,email,password,street,city,zip_code,"
-                "created_at,COALESCE(is_admin,0),last_seen "
-                "FROM users WHERE id=?", (user_id,)
+                "created_at,last_seen FROM users WHERE id=?", (user_id,)
             ).fetchone()
         return User(row) if row else None
 
@@ -86,8 +84,7 @@ class User(UserMixin):
         with sqlite3.connect(DB_PATH) as con:
             row = con.execute(
                 "SELECT id,first_name,last_name,email,password,street,city,zip_code,"
-                "created_at,COALESCE(is_admin,0),last_seen "
-                "FROM users WHERE LOWER(email)=LOWER(?)", (email,)
+                "created_at,last_seen FROM users WHERE LOWER(email)=LOWER(?)", (email,)
             ).fetchone()
         return User(row) if row else None
 
@@ -115,16 +112,14 @@ def init_db():
                 city       TEXT,
                 zip_code   TEXT,
                 created_at TEXT DEFAULT (datetime('now')),
-                is_admin   INTEGER NOT NULL DEFAULT 0,
                 last_seen  TEXT
             )
         """)
-        # Migrate existing DB: add columns if missing
-        for col, definition in [("is_admin", "INTEGER NOT NULL DEFAULT 0"), ("last_seen", "TEXT")]:
-            try:
-                con.execute(f"ALTER TABLE users ADD COLUMN {col} {definition}")
-            except Exception:
-                pass
+        # Migrate existing DB: add last_seen if missing
+        try:
+            con.execute("ALTER TABLE users ADD COLUMN last_seen TEXT")
+        except Exception:
+            pass
         con.execute("""
             CREATE TABLE IF NOT EXISTS api_tokens (
                 id         INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -688,15 +683,18 @@ def water_meter_latest():
 
 
 # ============================================================
-#  ADMIN — helper decorator
+#  ADMIN — session store (in-memory, not Flask-Login)
 # ============================================================
+_admin_sessions = set()
+
+def is_admin_session():
+    return request.cookies.get("admin_session") in _admin_sessions
+
 def admin_required(f):
     from functools import wraps
     @wraps(f)
     def decorated(*args, **kwargs):
-        if not current_user.is_authenticated:
-            return jsonify({"error": "Non authentifie."}), 401
-        if not current_user.is_admin:
+        if not is_admin_session():
             return jsonify({"error": "Acces refuse."}), 403
         return f(*args, **kwargs)
     return decorated
@@ -707,71 +705,60 @@ def admin_required(f):
 # ============================================================
 @app.route("/admin/login")
 def admin_login_page():
-    if current_user.is_authenticated and current_user.is_admin:
+    if is_admin_session():
         return redirect("/admin")
     base = os.path.dirname(os.path.abspath(__file__))
     for name in ["Admin_login.html", "admin_login.html"]:
         path = os.path.join(base, name)
         if os.path.exists(path):
             return send_file(path)
-    return "Admin login page not found. Please add Admin_login.html to your project.", 404
+    return "Admin_login.html not found.", 404
 
 
 @app.route("/admin")
-@login_required
 def admin_page():
-    if not current_user.is_admin:
-        return redirect("/dashboard")
+    if not is_admin_session():
+        return redirect("/admin/login")
     base = os.path.dirname(os.path.abspath(__file__))
-    for name in ["Admin_panel.html", "admin_panel.html", "Admin.html"]:
+    for name in ["Admin_panel.html", "Admin.html", "admin_panel.html"]:
         path = os.path.join(base, name)
         if os.path.exists(path):
             return send_file(path)
-    return "Admin panel not found. Please add Admin_panel.html to your project.", 404
+    return "Admin_panel.html not found.", 404
 
 
 # ============================================================
-#  ADMIN — one-time setup route (secured by ADMIN_SETUP_KEY env var)
-# ============================================================
-@app.route("/admin/setup")
-def admin_setup():
-    setup_key = os.getenv("ADMIN_SETUP_KEY", "")
-    provided  = request.args.get("key", "")
-    email     = request.args.get("email", "")
-    if not setup_key:
-        return "ADMIN_SETUP_KEY environment variable not set.", 403
-    if provided != setup_key:
-        return "Invalid key.", 403
-    if not email:
-        return "Provide ?email=your@email.com&key=YOUR_KEY", 400
-    with sqlite3.connect(DB_PATH) as con:
-        row = con.execute("SELECT id FROM users WHERE LOWER(email)=LOWER(?)", (email,)).fetchone()
-        if not row:
-            return f"User '{email}' not found. Register first at /login.", 404
-        con.execute("UPDATE users SET is_admin=1 WHERE id=?", (row[0],))
-        con.commit()
-    return f"✅ User '{email}' is now admin. You can login at /admin/login"
-
-
-# ============================================================
-#  ADMIN — login endpoint
+#  ADMIN — login endpoint (env vars: ADMIN_EMAIL, ADMIN_PASSWORD)
 # ============================================================
 @app.route("/admin/login", methods=["POST"])
 def admin_login():
     data     = request.get_json(silent=True) or {}
     email    = normalize_email(data.get("email", ""))
     password = str(data.get("password", ""))
-    user     = User.get_by_email(email)
-    if not user or not bcrypt.check_password_hash(user.password, password):
-        return jsonify({"error": "E-mail ou mot de passe incorrect."}), 401
-    if not user.is_admin:
-        return jsonify({"error": "Acces refuse. Compte non administrateur."}), 403
-    login_user(user, remember=True)
-    now = datetime.now(timezone.utc).isoformat(timespec="seconds")
-    with sqlite3.connect(DB_PATH) as con:
-        con.execute("UPDATE users SET last_seen=? WHERE id=?", (now, user.id))
-        con.commit()
-    return jsonify({"ok": True, "user": user.to_dict()}), 200
+
+    admin_email    = normalize_email(os.getenv("ADMIN_EMAIL", ""))
+    admin_password = os.getenv("ADMIN_PASSWORD", "")
+
+    if not admin_email or not admin_password:
+        return jsonify({"error": "Admin non configure sur le serveur."}), 500
+    if email != admin_email or password != admin_password:
+        return jsonify({"error": "Identifiants admin incorrects."}), 401
+
+    token = secrets.token_hex(32)
+    _admin_sessions.add(token)
+    resp = jsonify({"ok": True})
+    resp.set_cookie("admin_session", token, httponly=True,
+                    secure=True, samesite="None", max_age=86400)
+    return resp
+
+
+@app.route("/admin/logout", methods=["POST"])
+def admin_logout():
+    token = request.cookies.get("admin_session", "")
+    _admin_sessions.discard(token)
+    resp = jsonify({"ok": True})
+    resp.delete_cookie("admin_session")
+    return resp
 
 
 # ============================================================
@@ -800,7 +787,7 @@ def admin_list_users():
         con.row_factory = sqlite3.Row
         users = con.execute(
             "SELECT id, first_name, last_name, email, street, city, zip_code, "
-            "created_at, COALESCE(is_admin,0) as is_admin, last_seen FROM users ORDER BY id"
+            "created_at, last_seen FROM users ORDER BY id"
         ).fetchall()
         result = []
         for u in users:
@@ -823,7 +810,7 @@ def admin_list_users():
                 "city":           u["city"],
                 "zip_code":       u["zip_code"],
                 "created_at":     u["created_at"],
-                "is_admin":       bool(u["is_admin"]),
+                "is_admin":       (normalize_email(u["email"]) == normalize_email(os.getenv("ADMIN_EMAIL",""))),
                 "last_seen":      u["last_seen"],
                 "readings_count": readings_count,
                 "alerts_count":   alerts_count,
@@ -835,14 +822,12 @@ def admin_list_users():
 @app.route("/api/admin/users/<int:user_id>", methods=["DELETE"])
 @admin_required
 def admin_delete_user(user_id):
-    if user_id == current_user.id:
-        return jsonify({"error": "Impossible de supprimer votre propre compte."}), 400
     with sqlite3.connect(DB_PATH) as con:
-        row = con.execute("SELECT is_admin FROM users WHERE id=?", (user_id,)).fetchone()
+        row = con.execute("SELECT email FROM users WHERE id=?", (user_id,)).fetchone()
         if not row:
             return jsonify({"error": "Utilisateur introuvable."}), 404
-        if row[0]:
-            return jsonify({"error": "Impossible de supprimer un administrateur."}), 403
+        if normalize_email(row[0]) == normalize_email(os.getenv("ADMIN_EMAIL", "")):
+            return jsonify({"error": "Impossible de supprimer le compte admin."}), 403
         con.execute("DELETE FROM readings   WHERE user_id=?", (user_id,))
         con.execute("DELETE FROM alerts     WHERE user_id=?", (user_id,))
         con.execute("DELETE FROM api_tokens WHERE user_id=?", (user_id,))
