@@ -37,7 +37,7 @@ CORS(app, supports_credentials=True, origins=_cors_origins())
 
 app.config["SECRET_KEY"]              = os.getenv("SECRET_KEY", "batisense_secret_key_123456")
 app.config["SESSION_COOKIE_HTTPONLY"] = True
-app.config["SESSION_COOKIE_SAMESITE"] = os.getenv("SESSION_COOKIE_SAMESITE", "None")
+app.config["SESSION_COOKIE_SAMESITE"] = os.getenv("SESSION_COOKIE_SAMESITE", "Lax")
 app.config["SESSION_COOKIE_SECURE"]   = os.getenv("SESSION_COOKIE_SECURE", "True") == "True"
 
 bcrypt        = Bcrypt(app)
@@ -55,7 +55,8 @@ DB_PATH = os.path.abspath(os.path.join(DATA_DIR, "batisense.db"))
 class User(UserMixin):
     def __init__(self, row):
         (self.id, self.first_name, self.last_name, self.email,
-         self.password, self.street, self.city, self.zip_code, self.created_at) = row
+         self.password, self.street, self.city, self.zip_code,
+         self.created_at, self.is_admin) = row
 
     def to_dict(self):
         return {
@@ -67,13 +68,15 @@ class User(UserMixin):
             "city": self.city,
             "zip_code": self.zip_code,
             "created_at": self.created_at,
+            "is_admin": bool(self.is_admin),
         }
 
     @staticmethod
     def get_by_id(user_id):
         with sqlite3.connect(DB_PATH) as con:
             row = con.execute(
-                "SELECT id,first_name,last_name,email,password,street,city,zip_code,created_at "
+                # Both get_by_id and get_by_email — add is_admin at the end of SELECT:
+                "SELECT id,first_name,last_name,email,password,street,city,zip_code,created_at,is_admin "
                 "FROM users WHERE id=?", (user_id,)
             ).fetchone()
         return User(row) if row else None
