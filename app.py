@@ -19,11 +19,13 @@ from flask_cors import CORS
 from flask_login import LoginManager, UserMixin, login_required, login_user, logout_user, current_user
 from flask_bcrypt import Bcrypt
 from flask import send_from_directory
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 # ============================================================
 #  App & extensions
 # ============================================================
 app = Flask(__name__)
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
 
 def _cors_origins():
     raw = os.getenv("CORS_ORIGINS", "").strip()
@@ -43,8 +45,6 @@ login_manager = LoginManager(app)
 login_manager.login_view    = "login_page"
 login_manager.login_message = None
 
-# Database stored in a persistent volume when deployed on Railway.
-# DATA_DIR should point to a mounted volume such as /data.
 DATA_DIR = os.getenv("DATA_DIR") or ("/data" if os.name != "nt" else ".")
 os.makedirs(DATA_DIR, exist_ok=True)
 DB_PATH = os.path.abspath(os.path.join(DATA_DIR, "batisense.db"))
@@ -94,7 +94,7 @@ def load_user(user_id):
 
 
 # ============================================================
-#  Database init — called at startup
+#  Database init
 # ============================================================
 def init_db():
     with sqlite3.connect(DB_PATH) as con:
@@ -193,31 +193,8 @@ THRESHOLDS = {
     "gas_detected":    {"eq": 1,                "level": "danger"},
     "structure_alert": {"eq": 1,                "level": "danger"},
     "door_open":       {"eq": 1,                "level": "info"},
-    "water_meter":     {"min": 0, "max": 99999, "level": "info"},   # accepts any positive reading
+    "water_meter":     {"min": 0, "max": 99999, "level": "info"},
 }
-
-SENSOR_ALIASES = {
-    "electricity": {
-        "daily_consumption", "consumption", "consommation", "total",
-        "energy", "kwh", "power", "watt", "watts", "current", "amp", "amps", "ampere", "ampereh"
-    },
-    "water": {
-        "daily_consumption", "consumption", "consommation", "flow", "volume", "liters", "litres"
-    },
-    "gas_node": {
-        "daily_consumption", "consumption", "consommation", "gas", "volume"
-    },
-}
-
-
-def normalize_sensor_type(node_id, sensor_type):
-    sensor = str(sensor_type or "").strip().lower()
-    if sensor in {"value", "reading", "reading_value", "consumption", "consommation"}:
-        return "daily_consumption"
-    aliases = SENSOR_ALIASES.get(str(node_id or "").strip().lower(), set())
-    if sensor in aliases:
-        return "daily_consumption"
-    return sensor
 
 
 def check_and_raise_alert(db, user_id, node_id, sensor_type, value, timestamp):
@@ -406,7 +383,7 @@ def delete_token(token_id):
 
 
 # ============================================================
-#  Pi LOGIN — Pi calls this once at startup
+#  Pi LOGIN
 # ============================================================
 @app.route("/api/pi/login", methods=["POST"])
 def pi_login():
@@ -434,7 +411,7 @@ def pi_login():
 
 
 # ============================================================
-#  Pi DATA — Pi sends sensor readings
+#  Pi DATA
 # ============================================================
 @app.route("/api/pi/data", methods=["POST"])
 @require_token
@@ -454,7 +431,6 @@ def pi_receive_data():
     db = sqlite3.connect(DB_PATH)
     try:
         for sensor_type, value in sensors.items():
-            sensor_type = normalize_sensor_type(node_id, sensor_type)
             db.execute(
                 "INSERT INTO readings (node_id,sensor_type,value,timestamp,user_id) VALUES (?,?,?,?,?)",
                 (node_id, sensor_type, float(value), timestamp, user.id)
@@ -647,7 +623,7 @@ def health():
 
 
 # ============================================================
-#  WATER METER — dedicated read endpoint (public for quick check)
+#  WATER METER
 # ============================================================
 @app.route("/api/water_meter/latest")
 @login_required
@@ -672,7 +648,7 @@ def water_meter_latest():
 
 
 # ============================================================
-#  BOOT — init DB then start server
+#  BOOT
 # ============================================================
 init_db()
 
