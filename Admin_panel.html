@@ -380,8 +380,8 @@
   }
 
   async function logout() {
-    await fetch("/auth/logout", { method: "POST", credentials: "include" });
-    window.location.href = "/login";
+    await fetch("/admin/logout", { method: "POST", credentials: "include" });
+    window.location.href = "/admin/login";
   }
 
   function toast(msg, isError=false) {
@@ -391,14 +391,14 @@
     setTimeout(() => el.className = "", 3000);
   }
 
-  // Load admin email
-  fetch("/auth/me", { credentials: "include" })
-    .then(r => r.json())
-    .then(d => {
-      if (d.user) document.getElementById("adminEmail").textContent = d.user.email;
-      if (!d.user?.is_admin) window.location.href = "/dashboard";
+  // Verify admin session
+  fetch("/api/admin/stats", { credentials: "include" })
+    .then(r => {
+      if (r.status === 403 || r.status === 401) {
+        window.location.href = "/admin/login";
+      }
     })
-    .catch(() => window.location.href = "/login");
+    .catch(() => window.location.href = "/admin/login");
 
   loadAll();
 </script>
