@@ -709,7 +709,12 @@ def admin_required(f):
 def admin_login_page():
     if current_user.is_authenticated and current_user.is_admin:
         return redirect("/admin")
-    return send_file("Admin_login.html")
+    base = os.path.dirname(os.path.abspath(__file__))
+    for name in ["Admin_login.html", "admin_login.html"]:
+        path = os.path.join(base, name)
+        if os.path.exists(path):
+            return send_file(path)
+    return "Admin login page not found. Please add Admin_login.html to your project.", 404
 
 
 @app.route("/admin")
@@ -717,7 +722,12 @@ def admin_login_page():
 def admin_page():
     if not current_user.is_admin:
         return redirect("/dashboard")
-    return send_file("Admin.html")
+    base = os.path.dirname(os.path.abspath(__file__))
+    for name in ["Admin_panel.html", "admin_panel.html", "Admin.html"]:
+        path = os.path.join(base, name)
+        if os.path.exists(path):
+            return send_file(path)
+    return "Admin panel not found. Please add Admin_panel.html to your project.", 404
 
 
 # ============================================================
