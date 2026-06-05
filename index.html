@@ -3240,10 +3240,20 @@ function sendDesktopNotif(title,body){
 }
 function testNotification(){
     sendDesktopNotif("BatiSense Pro","✅ Notification fonctionnelle! Les seuils d'alerte sont actifs.");
+    const notifEmail=localStorage.getItem("bs_notif_email")==="true";
+    const notifSms=localStorage.getItem("bs_notif_sms")==="true";
+    const emailAddr=localStorage.getItem("bs_notif_email_addr")||"";
+    const smsPhone=localStorage.getItem("bs_notif_sms_phone")||"";
+    let tests=[];
+    if(notifEmail&&emailAddr) tests.push(fetch(`${API_BASE}/api/send-notification`,{method:"POST",headers:{"Content-Type":"application/json"},credentials:"include",body:JSON.stringify({type:"email",to:emailAddr,subject:"BatiSense Pro - Test",message:"✅ Test de notification réussi! Vos alertes fonctionnent correctement."})}).catch(()=>{}));
+    if(notifSms&&smsPhone) tests.push(fetch(`${API_BASE}/api/send-notification`,{method:"POST",headers:{"Content-Type":"application/json"},credentials:"include",body:JSON.stringify({type:"sms",to:smsPhone,subject:"BatiSense Pro - Test",message:"Test notification SMS"})}).catch(()=>{}));
     const msg=document.getElementById("thresh-msg");
-    msg.textContent="✓ Notification envoyée";
-    msg.style.opacity="1";
-    setTimeout(()=>{msg.textContent="✓ Enregistré";msg.style.opacity="0";},2500);
+    Promise.all(tests).then(()=>{
+        msg.textContent="✓ Test de notification envoyé";
+        msg.style.opacity="1";
+        msg.style.color="var(--green)";
+        setTimeout(()=>{msg.textContent="✓ Enregistré";msg.style.opacity="0";msg.style.color="var(--green)";},3000);
+    });
 }
 document.addEventListener("DOMContentLoaded",()=>{renderThresholds();if("Notification"in window&&Notification.permission==="default")Notification.requestPermission();});
 /* ══ PWA Install ══ */

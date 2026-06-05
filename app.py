@@ -13,6 +13,9 @@ import queue
 import secrets
 import os
 import re
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 from datetime import datetime, timezone, timedelta
 from flask import Flask, request, jsonify, Response, send_file, stream_with_context, redirect
 from flask_cors import CORS
@@ -655,6 +658,62 @@ def sse_stream():
 @app.route("/api/health")
 def health():
     return jsonify({"status": "ok", "subscribers": sum(len(v) for v in _subscribers.values())})
+
+
+# ============================================================
+#  SMTP / Notification
+# ============================================================
+SMTP_HOST = os.getenv("SMTP_HOST", "")
+SMTP_PORT = int(os.getenv("SMTP_PORT", 587))
+SMTP_USER = os.getenv("SMTP_USER", "")
+SMTP_PASS = os.getenv("SMTP_PASS", "")
+SMTP_FROM = os.getenv("SMTP_FROM", SMTP_USER)
+
+
+@app.route("/api/send-notification", methods=["POST"])
+@login_required
+def send_notification():
+    data = request.get_json(silent=True) or {}
+    notif_type = data.get("type", "email")
+    to = str(data.get("to", "")).strip()
+    subject = str(data.get("subject", "BatiSense Pro - Notification"))
+    message = str(data.get("message", ""))
+
+    if not to or not message:
+        return jsonify({"error": "Champs 'to' et 'message' requis"}), 400
+    if not SMTP_HOST or not SMTP_USER or not SMTP_PASS:
+        return jsonify({"error": "SMTP non configure sur le serveur"}), 500
+
+    try:
+        recipients = [to]
+
+        # If type is "sms" and the recipient looks like a phone number,
+        # rewrite it using the email-to-SMS gateway.
+        if notif_type == "sms" and re.match(r'^\+?\d{7,15}$', to):
+            sms_gateway = os.getenv("SMS_GATEWAY", "")
+            if sms_gateway:
+                recipients = [f"{to}@{sms_gateway}"]
+            # else: send as-is (maybe the user typed a full email address)
+
+        msg = MIMEMultipart()
+        msg["From"] = SMTP_FROM
+        msg["Subject"] = subject
+        msg.attach(MIMEText(message, "plain", "utf-8"))
+
+        with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as server:
+            server.starttls()
+            server.login(SMTP_USER, SMTP_PASS)
+            for rcpt in recipients:
+                m = MIMEMultipart()
+                m["From"] = SMTP_FROM
+                m["To"] = rcpt
+                m["Subject"] = subject
+                m.attach(MIMEText(message, "plain", "utf-8"))
+                server.send_message(m)
+
+        return jsonify({"ok": True, "type": notif_type, "to": recipients}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 # ============================================================
