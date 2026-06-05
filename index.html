@@ -2852,23 +2852,37 @@ const WMO_CODES = {
 async function loadWeather(){
     try{
         let lat=48.8566, lon=2.3522, locText="";
-        for(const url of["http://ip-api.com/json/?fields=lat,lon,city,regionName","https://ipapi.co/json/","https://ipinfo.io/json"]){
-            try{
-                const g=await fetch(url,{signal:AbortSignal.timeout(3000)}).then(r=>r.json()).catch(()=>null);
-                if(!g) continue;
-                const glat=g.lat||g.latitude||(g.loc&&+g.loc.split(",")[0]);
-                const glon=g.lon||g.longitude||(g.loc&&+g.loc.split(",")[1]);
-                if(glat!=null&&glon!=null){lat=glat;lon=glon;}
-                const city=g.city||g.region||g.regionName;
-                if(city){locText=city+(g.region||g.regionName?`, ${g.region||g.regionName}`:"");}
-                break;
-            }catch{}
-        }
-        if(!locText&&"geolocation" in navigator){
-            try{
-                const pos=await new Promise((res,rej)=>navigator.geolocation.getCurrentPosition(res,rej,{timeout:5000}));
-                lat=pos.coords.latitude;lon=pos.coords.longitude;
-            }catch{}
+        const saved=localStorage.getItem("bs_loc");
+        if(saved){const p=saved.split("|");lat=+p[0];lon=+p[1];locText=p[2]||"";}
+        if(!locText){
+            if("geolocation" in navigator){
+                try{
+                    const pos=await new Promise((res,rej)=>navigator.geolocation.getCurrentPosition(res,rej,{timeout:5000}));
+                    lat=pos.coords.latitude;lon=pos.coords.longitude;
+                    try{
+                        const n=await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&accept-language=fr`,{headers:{"User-Agent":"BatiSensePro/1.0"}}).then(r=>r.json());
+                        if(n&&n.address){
+                            const a=n.address;
+                            locText=[a.city||a.town||a.village||a.county,a.state,a.country].filter(Boolean).join(", ");
+                        }
+                    }catch{}
+                    if(locText) localStorage.setItem("bs_loc",`${lat}|${lon}|${locText}`);
+                }catch{}
+            }
+            if(!locText){
+                for(const url of["http://ip-api.com/json/?fields=lat,lon,city,regionName","https://ipapi.co/json/","https://ipinfo.io/json"]){
+                    try{
+                        const g=await fetch(url,{signal:AbortSignal.timeout(3000)}).then(r=>r.json()).catch(()=>null);
+                        if(!g) continue;
+                        const glat=g.lat||g.latitude||(g.loc&&+g.loc.split(",")[0]);
+                        const glon=g.lon||g.longitude||(g.loc&&+g.loc.split(",")[1]);
+                        if(glat!=null&&glon!=null){lat=glat;lon=glon;}
+                        const city=g.city||g.region||g.regionName;
+                        if(city){locText=city+(g.region||g.regionName?`, ${g.region||g.regionName}`:"");}
+                        break;
+                    }catch{}
+                }
+            }
         }
         const w=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m&timezone=auto`,{signal:AbortSignal.timeout(6000)}).then(r=>r.json());
         const c=w.current;
@@ -2892,6 +2906,21 @@ async function loadWeather(){
         document.getElementById("weather-desc").textContent="Météo indisponible";
     }
 }
+document.addEventListener("DOMContentLoaded",()=>{
+    const locEl=document.getElementById("weather-location");
+    if(locEl){
+        locEl.style.cursor="pointer";
+        locEl.title="Cliquez pour modifier la localisation";
+        locEl.addEventListener("click",()=>{
+            const current=locEl.textContent;
+            const input=prompt("Entrez votre ville:",current);
+            if(input&&input.trim()){
+                locEl.textContent=input.trim();
+                localStorage.setItem("bs_loc_name",input.trim());
+            }
+        });
+    }
+});
 /* ══ Room tabs ══ */
 document.addEventListener("DOMContentLoaded",()=>{
     const tabs=document.querySelectorAll(".room-tab");
