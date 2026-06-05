@@ -1445,8 +1445,6 @@
         html[data-theme="dark"] .notif-item:hover{background:rgba(255,255,255,.08)!important}
         html[data-theme="dark"] .room-tab{background:rgba(255,255,255,.08)!important;border-color:rgba(255,255,255,.12)!important;color:rgba(247,247,242,.7)!important}
         html[data-theme="dark"] .room-tab.active{background:rgba(241,200,75,.2)!important;border-color:rgba(241,200,75,.4)!important;color:#f4c84d!important}
-        html[data-theme="dark"] .floor-plan-wrap{background:rgba(255,255,255,.04)!important;border-color:rgba(255,255,255,.08)!important}
-        html[data-theme="dark"] .floor-plan-svg text{fill:rgba(247,247,242,.5)!important}
         html[data-theme="dark"] .cons-ico{color:#fff!important}
         html[data-theme="dark"] .s-nav-sec,
         html[data-theme="dark"] .kcard-sub,
@@ -1505,9 +1503,6 @@
         html[data-theme="light"] .notif-btn{background:rgba(248,248,242,.86)!important;border-color:rgba(255,255,255,.58)!important;color:#24231e!important}
         html[data-theme="light"] .room-tab{background:rgba(255,255,255,.5)!important;border-color:rgba(0,0,0,.1)!important;color:#24231e!important}
         html[data-theme="light"] .room-tab.active{background:rgba(241,200,75,.3)!important;border-color:rgba(241,200,75,.5)!important;color:#7a6a19!important}
-        html[data-theme="light"] .floor-plan-wrap{background:rgba(0,0,0,.03)!important;border-color:rgba(0,0,0,.08)!important}
-        html[data-theme="light"] .floor-plan-svg text{fill:rgba(36,35,30,.5)!important}
-        html[data-theme="light"] .floor-plan-svg rect{stroke:rgba(0,0,0,.15)!important}
         /* Sensor card readability pass */
         #nodes-container{
             grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
@@ -1764,12 +1759,6 @@
         .skeleton-node .sk-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
         .skeleton-node .sk-sensor{height:48px;border-radius:12px}
 
-        /* ═══════════════ FLOOR PLAN ═══════════════ */
-        .floor-plan-wrap{position:relative;width:100%;border-radius:16px;overflow:hidden;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);aspect-ratio:4/3}
-        .floor-plan-svg{width:100%;height:100%;display:block}
-        .floor-room{transition:all .3s;cursor:pointer}
-        .floor-room:hover{opacity:.8}
-        .floor-room.active{filter:drop-shadow(0 0 10px rgba(241,200,75,.5))}
         .room-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
         .room-tab{
             padding:7px 16px;border-radius:999px;border:1px solid rgba(255,255,255,.15);
@@ -2102,43 +2091,7 @@
                     <div class="cbox h180"><canvas id="chartPresence"></canvas></div>
                 </div>
             </div>
-            <div class="panel" style="margin-top:12px">
-                <div class="ph"><div class="pt"><i class="fas fa-draw-polygon"></i> Plan du bâtiment</div></div>
-                <div class="g2" style="gap:16px">
-                    <div class="floor-plan-wrap">
-                        <svg class="floor-plan-svg" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
-                            <rect x="2" y="2" width="396" height="296" rx="8" fill="none" stroke="rgba(255,255,255,.1)" stroke-width="1.5"/>
-                            <rect x="10" y="10" width="180" height="130" rx="6" fill="rgba(0,245,160,.06)" stroke="rgba(0,245,160,.25)" stroke-width="1.5" class="floor-room" id="fp-kitchen"/>
-                            <text x="100" y="80" text-anchor="middle" fill="rgba(255,255,255,.5)" font-size="11" font-family="Inter,sans-serif" font-weight="700">🍳 Cuisine</text>
-                            <text x="100" y="100" text-anchor="middle" fill="rgba(255,255,255,.3)" font-size="9" font-family="Inter,sans-serif" id="fp-kitchen-temp">--°C</text>
-                            <rect x="200" y="10" width="190" height="130" rx="6" fill="rgba(0,212,224,.06)" stroke="rgba(0,212,224,.25)" stroke-width="1.5" class="floor-room" id="fp-salon"/>
-                            <text x="295" y="80" text-anchor="middle" fill="rgba(255,255,255,.5)" font-size="11" font-family="Inter,sans-serif" font-weight="700">🛋️ Salon</text>
-                            <text x="295" y="100" text-anchor="middle" fill="rgba(255,255,255,.3)" font-size="9" font-family="Inter,sans-serif" id="fp-salon-temp">--°C</text>
-                            <rect x="10" y="150" width="130" height="100" rx="6" fill="rgba(241,200,75,.06)" stroke="rgba(241,200,75,.25)" stroke-width="1.5" class="floor-room" id="fp-port"/>
-                            <text x="75" y="205" text-anchor="middle" fill="rgba(255,255,255,.5)" font-size="11" font-family="Inter,sans-serif" font-weight="700">🚪 Porte</text>
-                            <text x="75" y="220" text-anchor="middle" fill="rgba(255,255,255,.3)" font-size="9" font-family="Inter,sans-serif" id="fp-port-status">--</text>
-                            <rect x="150" y="150" width="130" height="100" rx="6" fill="rgba(77,141,255,.06)" stroke="rgba(77,141,255,.25)" stroke-width="1.5" class="floor-room" id="fp-room"/>
-                            <text x="215" y="205" text-anchor="middle" fill="rgba(255,255,255,.5)" font-size="11" font-family="Inter,sans-serif" font-weight="700">🛏️ Chambre</text>
-                            <text x="215" y="220" text-anchor="middle" fill="rgba(255,255,255,.3)" font-size="9" font-family="Inter,sans-serif" id="fp-room-status">--</text>
-                            <rect x="290" y="150" width="100" height="100" rx="6" fill="rgba(160,107,255,.06)" stroke="rgba(160,107,255,.25)" stroke-width="1.5"/>
-                            <text x="340" y="205" text-anchor="middle" fill="rgba(255,255,255,.4)" font-size="11" font-family="Inter,sans-serif" font-weight="700">⚡ Technique</text>
-                            <text x="340" y="260" text-anchor="middle" fill="rgba(255,255,255,.2)" font-size="9" font-family="Inter,sans-serif">Tableau électrique</text>
-                            <rect x="10" y="260" width="380" height="30" rx="4" fill="rgba(255,255,255,.03)" stroke="rgba(255,255,255,.08)" stroke-width="1"/>
-                            <text x="200" y="280" text-anchor="middle" fill="rgba(255,255,255,.3)" font-size="9" font-family="Inter,sans-serif">Couloir · Détecteurs de fumée · Accès réseau</text>
-                        </svg>
-                    </div>
-                    <div class="panel" style="margin-bottom:0;display:flex;flex-direction:column;justify-content:center;min-height:auto">
-                        <div class="pt" style="margin-bottom:10px"><i class="fas fa-info-circle"></i> Légende</div>
-                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:11px;color:rgba(255,255,255,.7)">
-                            <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:rgba(0,245,160,.25);margin-right:6px;vertical-align:middle"></span>Cuisine</span>
-                            <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:rgba(0,212,224,.25);margin-right:6px;vertical-align:middle"></span>Salon</span>
-                            <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:rgba(241,200,75,.25);margin-right:6px;vertical-align:middle"></span>Porte</span>
-                            <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:rgba(77,141,255,.25);margin-right:6px;vertical-align:middle"></span>Chambre</span>
-                        </div>
-                        <div id="fp-timestamps" style="margin-top:14px;font-size:10px;color:rgba(255,255,255,.4);border-top:1px solid rgba(255,255,255,.06);padding-top:10px"></div>
-                    </div>
-                </div>
-            </div>
+
         </section>
 
         <!-- ═══ NODES ═══ -->
@@ -2533,7 +2486,7 @@ function onSensorEvent(d) {
     }
     if(!state.latest[nid]) state.latest[nid]={};
     state.latest[nid][sensor_type]=value; state.nodeSeen[nid]=timestamp;
-    flashLiveDot(nid,timestamp); updateCardForNode(nid,sensor_type,value); updateNodeCard(nid); updateFloorPlan(nid,sensor_type,value);
+    flashLiveDot(nid,timestamp); updateCardForNode(nid,sensor_type,value); updateNodeCard(nid);
     const pt={x:new Date(timestamp).getTime(),y:value};
     if(nid==="kitchen"&&sensor_type==="temperature"&&(_tempFilter==="all"||_tempFilter==="kitchen")) appendChartPoint("temp","Cuisine","var(--green)",pt);
     if(nid==="salon"&&sensor_type==="temperature"&&(_tempFilter==="all"||_tempFilter==="salon")) appendChartPoint("temp","Salon","var(--teal)",pt);
@@ -2573,16 +2526,6 @@ function renderAverages() {
     if(hd.length) setText("avg-hum-detail",hd.join(" · "));
     if(a.avg_temperature!==null) flashEl("avg-temp-card");
     if(a.avg_humidity!==null) flashEl("avg-hum-card");
-}
-function updateFloorPlan(nid,sensor,value){
-    if(nid==="kitchen"&&sensor==="temperature") setText("fp-kitchen-temp",`${value.toFixed(1)}°C`);
-    if(nid==="salon"&&sensor==="temperature") setText("fp-salon-temp",`${value.toFixed(1)}°C`);
-    if(nid==="port"&&sensor==="door_open") setText("fp-port-status",value===1?"🚪 Ouverte":"🚪 Fermée");
-    if(nid==="room"&&sensor==="presence") setText("fp-room-status",value===1?"👤 Présent":"👤 Absent");
-    const ts=[];
-    if(state.nodeSeen.kitchen) ts.push(`Cuisine: ${new Date(state.nodeSeen.kitchen).toLocaleTimeString("fr-FR")}`);
-    if(state.nodeSeen.salon) ts.push(`Salon: ${new Date(state.nodeSeen.salon).toLocaleTimeString("fr-FR")}`);
-    if(ts.length) setText("fp-timestamps","Dernière mise à jour: "+ts.join(" · "));
 }
 function updateCardForNode(nid,sensor,value) {
     if(nid==="kitchen"){
@@ -2845,24 +2788,58 @@ onAlertEvent=function(d){
     _origOnAlert(d);
     pushNotif(d.level,d.node_id,d.message,d.timestamp);
 };
-/* ══ Weather ══ */
+/* ══ Weather (Open-Meteo) ══ */
+const WMO_CODES = {
+    0:{icon:"sunny",label:"Dégagé",fa:"fa-sun"},
+    1:{icon:"sunny",label:"Peu nuageux",fa:"fa-sun"},
+    2:{icon:"cloudy",label:"Partiellement nuageux",fa:"fa-cloud-sun"},
+    3:{icon:"cloudy",label:"Nuageux",fa:"fa-cloud"},
+    45:{icon:"cloudy",label:"Brouillard",fa:"fa-smog"},
+    48:{icon:"cloudy",label:"Brouillard givrant",fa:"fa-smog"},
+    51:{icon:"rainy",label:"Bruine légère",fa:"fa-cloud-drizzle"},
+    53:{icon:"rainy",label:"Bruine modérée",fa:"fa-cloud-drizzle"},
+    55:{icon:"rainy",label:"Bruine dense",fa:"fa-cloud-drizzle"},
+    61:{icon:"rainy",label:"Pluie légère",fa:"fa-cloud-rain"},
+    63:{icon:"rainy",label:"Pluie modérée",fa:"fa-cloud-rain"},
+    65:{icon:"rainy",label:"Pluie forte",fa:"fa-cloud-showers-heavy"},
+    71:{icon:"rainy",label:"Neige légère",fa:"fa-snowflake"},
+    73:{icon:"rainy",label:"Neige modérée",fa:"fa-snowflake"},
+    75:{icon:"rainy",label:"Neige forte",fa:"fa-snowflake"},
+    80:{icon:"rainy",label:"Averses légères",fa:"fa-cloud-rain"},
+    81:{icon:"rainy",label:"Averses modérées",fa:"fa-cloud-rain"},
+    82:{icon:"rainy",label:"Averses violentes",fa:"fa-cloud-showers-heavy"},
+    95:{icon:"rainy",label:"Orage",fa:"fa-bolt"},
+    96:{icon:"rainy",label:"Orage avec grêle",fa:"fa-bolt"},
+    99:{icon:"rainy",label:"Orage violent",fa:"fa-bolt"}
+};
 async function loadWeather(){
     try{
-        const w=await fetch("https://wttr.in/?format=j1",{signal:AbortSignal.timeout(5000)}).then(r=>r.json());
-        const cc=w.current_condition[0];
-        const temp=cc.temp_C, hum=cc.humidity, wind=cc.windspeedKmph, desc=cc.weatherDesc[0].value;
+        let lat=48.8566, lon=2.3522;
+        const cached=localStorage.getItem("bs_weather_loc");
+        if(cached){const p=cached.split(",");lat=+p[0];lon=+p[1];}
+        else if("geolocation" in navigator){
+            try{
+                const pos=await new Promise((res,rej)=>navigator.geolocation.getCurrentPosition(res,rej,{timeout:5000}));
+                lat=pos.coords.latitude;lon=pos.coords.longitude;
+                localStorage.setItem("bs_weather_loc",`${lat},${lon}`);
+            }catch{}
+        }
+        const w=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m&timezone=auto`,{signal:AbortSignal.timeout(6000)}).then(r=>r.json());
+        const c=w.current;
+        const temp=Math.round(c.temperature_2m), hum=c.relative_humidity_2m, wind=c.wind_speed_10m, code=c.weather_code;
+        const wmo=WMO_CODES[code]||WMO_CODES[0];
         document.getElementById("weather-temp").textContent=temp;
         document.getElementById("weather-hum").textContent=hum;
-        document.getElementById("weather-wind").textContent=wind;
-        document.getElementById("weather-desc").textContent=desc;
+        document.getElementById("weather-wind").textContent=Math.round(wind);
+        document.getElementById("weather-desc").textContent=wmo.label;
         const icon=document.getElementById("weather-icon");
-        if(desc.toLowerCase().includes("sun")||desc.toLowerCase().includes("clear")){icon.className="weather-icon sunny";icon.innerHTML='<i class="fas fa-sun"></i>';}
-        else if(desc.toLowerCase().includes("cloud")||desc.toLowerCase().includes("overcast")){icon.className="weather-icon cloudy";icon.innerHTML='<i class="fas fa-cloud"></i>';}
-        else if(desc.toLowerCase().includes("rain")||desc.toLowerCase().includes("drizzle")||desc.toLowerCase().includes("thunder")){icon.className="weather-icon rainy";icon.innerHTML='<i class="fas fa-cloud-rain"></i>';}
-        else{icon.className="weather-icon cloudy";icon.innerHTML='<i class="fas fa-cloud-sun"></i>';}
+        icon.className="weather-icon "+wmo.icon;
+        icon.innerHTML=`<i class="fas ${wmo.fa}"></i>`;
     }catch{
         document.getElementById("weather-temp").textContent="--";
-        document.getElementById("weather-desc").textContent="Indisponible";
+        document.getElementById("weather-hum").textContent="--";
+        document.getElementById("weather-wind").textContent="--";
+        document.getElementById("weather-desc").textContent="Météo indisponible";
     }
 }
 /* ══ Room tabs ══ */
