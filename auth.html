@@ -238,10 +238,14 @@ button{font-family:var(--fui);cursor:pointer}
   overflow:hidden;
   position:relative;
   padding:24px;
+  background-color:#211f17;
   background:
-    linear-gradient(90deg,rgba(0,0,0,.66),rgba(0,0,0,.12) 46%,rgba(0,0,0,.42)),
-    url("https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1800&q=80") center/cover;
-  box-shadow:0 30px 80px rgba(0,0,0,.35);
+    radial-gradient(circle at 78% 16%,rgba(244,200,77,.30),transparent 34%),
+    linear-gradient(180deg,rgba(255,246,214,.10),rgba(0,0,0,.26) 58%,rgba(0,0,0,.52)),
+    linear-gradient(90deg,rgba(15,14,10,.78),rgba(15,14,10,.28) 48%,rgba(15,14,10,.56)),
+    url("https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1800&q=80") center 46%/cover;
+  background-blend-mode:screen,multiply,normal,normal;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.18),inset 0 -140px 150px rgba(0,0,0,.34),0 30px 80px rgba(0,0,0,.35);
 }
 .auth-surface::before{
   content:"BatiSense Home";
