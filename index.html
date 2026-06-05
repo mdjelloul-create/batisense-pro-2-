@@ -3245,8 +3245,6 @@ function testNotification(){
     msg.style.opacity="1";
     setTimeout(()=>{msg.textContent="✓ Enregistré";msg.style.opacity="0";},2500);
 }
-    }
-}
 document.addEventListener("DOMContentLoaded",()=>{renderThresholds();if("Notification"in window&&Notification.permission==="default")Notification.requestPermission();});
 /* ══ PWA Install ══ */
 let installPrompt=null;
