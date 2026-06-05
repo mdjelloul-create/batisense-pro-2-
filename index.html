@@ -1843,8 +1843,6 @@
             .topbar-l p span:not(.live-dot){display:none}
             .topbar .btn{font-size:0!important;padding:0!important;width:34px;height:34px;border-radius:50%!important}
             .topbar .btn i{font-size:14px!important;margin:0!important}
-            .install-btn{display:none!important}
-            #install-btn{display:none!important}
             #overview{padding:104px 12px 16px!important;grid-template-columns:1fr!important;gap:10px!important}
             #overview::before{font-size:22px!important;left:16px!important;top:24px!important;max-width:calc(100% - 32px)!important}
             #overview::after{font-size:9px!important;left:17px!important;top:52px!important;max-width:calc(100% - 34px)!important;display:block!important}
@@ -2009,7 +2007,7 @@
                 <div id="notif-list"></div>
             </div>
             <button class="btn" onclick="exportCSV()"><i class="fas fa-file-csv"></i> CSV</button>
-            <button class="btn install-btn" id="install-btn" style="display:none" title="Installer l'application">
+            <button class="btn install-btn" id="install-btn" title="Installer l'application">
                 <i class="fas fa-download"></i>
             </button>
             <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()" type="button" aria-label="Changer le theme" aria-pressed="false">
@@ -3062,14 +3060,15 @@ document.addEventListener("DOMContentLoaded",()=>{
 let installPrompt=null;
 window.addEventListener("beforeinstallprompt",e=>{
     e.preventDefault();installPrompt=e;
-    document.getElementById("install-btn").style.display="";
 });
 document.getElementById("install-btn").addEventListener("click",async()=>{
-    if(!installPrompt) return;
-    installPrompt.prompt();
-    const res=await installPrompt.userChoice;
-    if(res.outcome==="accepted") document.getElementById("install-btn").style.display="none";
-    installPrompt=null;
+    if(installPrompt){
+        installPrompt.prompt();
+        const res=await installPrompt.userChoice;
+        if(res.outcome==="accepted"){document.getElementById("install-btn").style.display="none";installPrompt=null;}
+    }else{
+        alert("Pour installer l'application:\n\n1. Ouvrez le menu du navigateur (⋮)\n2. Sélectionnez « Installer l'application » ou « Ajouter à l'écran d'accueil »\n\nSur Chrome Android: le bouton apparaît automatiquement quand l'app est détectée.");
+    }
 });
 window.addEventListener("appinstalled",()=>{document.getElementById("install-btn").style.display="none";});
 /* ══ Service Worker ══ */
