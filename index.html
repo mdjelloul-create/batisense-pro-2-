@@ -1435,8 +1435,9 @@
             color:#f7f7f2!important;
             -webkit-text-fill-color:currentColor;
         }
-        html[data-theme="dark"] .weather-widget{background:rgba(255,255,255,.06)!important;border-color:rgba(255,255,255,.1)!important}
-        html[data-theme="dark"] .weather-temp,html[data-theme="dark"] .weather-details,html[data-theme="dark"] .weather-location{color:#f7f7f2!important}
+        html[data-theme="dark"] .weather-widget{border-color:rgba(255,255,255,.1)!important}
+        html[data-theme="dark"] .weather-temp,html[data-theme="dark"] .weather-location,html[data-theme="dark"] .weather-unit{color:#f7f7f2!important}
+        html[data-theme="dark"] .weather-detail-item{background:rgba(255,255,255,.08)!important;color:rgba(247,247,242,.7)!important}
         html[data-theme="dark"] .notif-btn{background:rgba(255,255,255,.1)!important;border-color:rgba(255,255,255,.15)!important;color:#f7f7f2!important}
         html[data-theme="dark"] .notif-dropdown{background:rgba(28,28,24,.96)!important;border-color:rgba(255,255,255,.13)!important;color:#f7f7f2!important}
         html[data-theme="dark"] .notif-header h3,html[data-theme="dark"] .notif-item-title{color:#f7f7f2!important}
@@ -1499,7 +1500,9 @@
         html[data-theme="light"] #overview::before{color:#24231e!important;text-shadow:none!important}
         html[data-theme="light"] #overview::after{color:rgba(36,35,30,.72)!important;text-shadow:none!important}
         html[data-theme="light"] .weather-widget{background:rgba(255,255,255,.7)!important}
-        html[data-theme="light"] .weather-temp,html[data-theme="light"] .weather-details,html[data-theme="light"] .weather-location{color:#24231e!important}
+        html[data-theme="light"] .weather-widget::before{display:none!important}
+        html[data-theme="light"] .weather-temp,html[data-theme="light"] .weather-location,html[data-theme="light"] .weather-unit{color:#24231e!important}
+        html[data-theme="light"] .weather-detail-item{background:rgba(0,0,0,.06)!important;color:rgba(36,35,30,.7)!important}
         html[data-theme="light"] .notif-btn{background:rgba(248,248,242,.86)!important;border-color:rgba(255,255,255,.58)!important;color:#24231e!important}
         html[data-theme="light"] .room-tab{background:rgba(255,255,255,.5)!important;border-color:rgba(0,0,0,.1)!important;color:#24231e!important}
         html[data-theme="light"] .room-tab.active{background:rgba(241,200,75,.3)!important;border-color:rgba(241,200,75,.5)!important;color:#7a6a19!important}
@@ -1681,17 +1684,45 @@
 
         /* ═══════════════ WEATHER WIDGET ═══════════════ */
         .weather-widget{
-            display:flex;align-items:center;gap:14px;padding:14px 18px;
-            background:linear-gradient(135deg,rgba(116,191,194,.12),rgba(142,207,123,.08));
-            border-radius:16px;border:1px solid rgba(255,255,255,.12);
-            backdrop-filter:blur(12px);
+            display:flex;align-items:center;gap:16px;padding:16px 20px;
+            border-radius:18px;border:1px solid rgba(255,255,255,.13);
+            backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+            position:relative;overflow:hidden;
+            transition:background .6s ease;
         }
-        .weather-icon{font-size:32px;width:48px;text-align:center}
-        .weather-icon.sunny{color:#f4c84d}.weather-icon.cloudy{color:#8ea8d8}.weather-icon.rainy{color:#74bfc2}
-        .weather-temp{font-family:Inter,sans-serif;font-size:28px;font-weight:900;line-height:1}
-        .weather-location{font-size:11px;color:rgba(255,255,255,.55);margin-top:2px}
-        .weather-details{font-size:11px;color:rgba(255,255,255,.65);line-height:1.5}
-        .weather-details span{display:block}
+        .weather-widget::before{
+            content:"";position:absolute;inset:0;border-radius:18px;
+            opacity:.45;transition:opacity .6s ease;z-index:0;
+        }
+        .weather-widget.sunny{background:linear-gradient(135deg,rgba(244,200,77,.15),rgba(244,200,77,.04))}
+        .weather-widget.sunny::before{background:linear-gradient(135deg,rgba(244,200,77,.3),transparent 70%)}
+        .weather-widget.cloudy{background:linear-gradient(135deg,rgba(142,168,216,.13),rgba(142,168,216,.03))}
+        .weather-widget.cloudy::before{background:linear-gradient(135deg,rgba(142,168,216,.25),transparent 70%)}
+        .weather-widget.rainy{background:linear-gradient(135deg,rgba(116,191,194,.14),rgba(116,191,194,.04))}
+        .weather-widget.rainy::before{background:linear-gradient(135deg,rgba(116,191,194,.28),transparent 70%)}
+        .weather-icon-wrap{
+            position:relative;z-index:1;
+            width:56px;height:56px;border-radius:50%;
+            display:grid;place-items:center;flex-shrink:0;
+            font-size:26px;transition:all .4s;
+        }
+        .weather-icon-wrap.sunny{background:rgba(244,200,77,.18);color:#f4c84d;box-shadow:0 0 20px rgba(244,200,77,.15)}
+        .weather-icon-wrap.cloudy{background:rgba(142,168,216,.18);color:#8ea8d8;box-shadow:0 0 20px rgba(142,168,216,.15)}
+        .weather-icon-wrap.rainy{background:rgba(116,191,194,.18);color:#74bfc2;box-shadow:0 0 20px rgba(116,191,194,.15)}
+        .weather-body{position:relative;z-index:1;flex:1;min-width:0}
+        .weather-main{display:flex;align-items:baseline;gap:4px}
+        .weather-temp{font-size:32px;font-weight:900;line-height:1;letter-spacing:-1px}
+        .weather-unit{font-size:16px;font-weight:600;color:rgba(255,255,255,.45)}
+        .weather-feels{font-size:11px;color:rgba(255,255,255,.4);margin-top:1px}
+        .weather-location{font-size:11px;color:rgba(255,255,255,.55);margin-top:0}
+        .weather-details{display:flex;gap:14px;margin-top:8px;flex-wrap:wrap}
+        .weather-detail-item{
+            display:flex;align-items:center;gap:5px;
+            font-size:11px;color:rgba(255,255,255,.6);
+            background:rgba(255,255,255,.07);padding:4px 10px 4px 8px;
+            border-radius:8px;
+        }
+        .weather-detail-item i{font-size:10px;width:14px;text-align:center;opacity:.7}
 
         /* ═══════════════ NOTIFICATION BELL ═══════════════ */
         .notif-btn{
@@ -1983,14 +2014,18 @@
                     </div>
                 </div>
                 <div style="display:flex;flex-direction:column;gap:12px">
-                    <div class="weather-widget" id="weather-widget">
-                        <div class="weather-icon sunny" id="weather-icon"><i class="fas fa-sun"></i></div>
-                        <div>
-                            <div class="weather-temp"><span id="weather-temp">--</span>°C</div>
+                    <div class="weather-widget sunny" id="weather-widget">
+                        <div class="weather-icon-wrap sunny" id="weather-icon"><i class="fas fa-sun"></i></div>
+                        <div class="weather-body">
+                            <div class="weather-main">
+                                <span class="weather-temp"><span id="weather-temp">--</span></span>
+                                <span class="weather-unit">°C</span>
+                            </div>
                             <div class="weather-location" id="weather-location">Chargement…</div>
                             <div class="weather-details">
-                                <span id="weather-desc">Chargement…</span>
-                                <span>Humidité: <span id="weather-hum">--</span>% · Vent: <span id="weather-wind">--</span> km/h</span>
+                                <span class="weather-detail-item"><i class="fas fa-water"></i> <span id="weather-hum">--</span>%</span>
+                                <span class="weather-detail-item"><i class="fas fa-wind"></i> <span id="weather-wind">--</span> km/h</span>
+                                <span class="weather-detail-item" id="weather-desc"><i class="fas fa-cloud-sun"></i> Chargement…</span>
                             </div>
                         </div>
                     </div>
@@ -2842,11 +2877,14 @@ async function loadWeather(){
         document.getElementById("weather-temp").textContent=temp;
         document.getElementById("weather-hum").textContent=hum;
         document.getElementById("weather-wind").textContent=Math.round(wind);
-        document.getElementById("weather-desc").textContent=wmo.label;
+        const descEl=document.getElementById("weather-desc");
+        descEl.innerHTML=`<i class="fas ${wmo.fa}"></i> ${wmo.label}`;
         if(locText) document.getElementById("weather-location").textContent=locText;
-        const icon=document.getElementById("weather-icon");
-        icon.className="weather-icon "+wmo.icon;
-        icon.innerHTML=`<i class="fas ${wmo.fa}"></i>`;
+        const wClass=wmo.icon;
+        document.getElementById("weather-widget").className="weather-widget "+wClass;
+        const iw=document.getElementById("weather-icon");
+        iw.className="weather-icon-wrap "+wClass;
+        iw.innerHTML=`<i class="fas ${wmo.fa}"></i>`;
     }catch{
         document.getElementById("weather-temp").textContent="--";
         document.getElementById("weather-hum").textContent="--";
