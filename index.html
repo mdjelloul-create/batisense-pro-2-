@@ -2315,6 +2315,7 @@
                         <input type="checkbox" id="notif-sms-cb"> <i class="fas fa-phone" style="color:var(--green);font-size:13px"></i> SMS
                     </label>
                     <button class="btn" onclick="saveThresholds()" style="padding:8px 18px;font-size:12px"><i class="fas fa-save"></i> Enregistrer</button>
+                    <button class="btn" onclick="testNotification()" style="padding:8px 14px;font-size:11px;border-color:var(--b1);background:var(--bg3)"><i class="fas fa-bell"></i> Tester</button>
                     <span id="thresh-msg" style="font-size:11px;color:var(--green);opacity:0;transition:opacity .3s">✓ Enregistré</span>
                 </div>
             </div>
@@ -3229,11 +3230,24 @@ function checkThresholds(nid,sensor,value){
         if(notifSms&&smsPhone){
             try{fetch(`${API_BASE}/api/send-notification`,{method:"POST",headers:{"Content-Type":"application/json"},credentials:"include",body:JSON.stringify({type:"sms",to:smsPhone,message:msg})}).catch(()=>{});}catch{}
         }
-        if("Notification"in window&&Notification.permission==="granted") try{new Notification("BatiSense - Seuil dépassé",{body:msg});}catch{}
-        else if("Notification"in window&&Notification.permission!=="denied") Notification.requestPermission();
+        sendDesktopNotif("BatiSense - Seuil dépassé",msg);
     }
 }
-document.addEventListener("DOMContentLoaded",()=>{renderThresholds();});
+function sendDesktopNotif(title,body){
+    if(!("Notification"in window)) return;
+    if(Notification.permission==="granted"){try{new Notification(title,{body,icon:"batisense-icon.svg"});}catch{}}
+    else if(Notification.permission!=="denied"){Notification.requestPermission().then(p=>{if(p==="granted")try{new Notification(title,{body,icon:"batisense-icon.svg"});}catch{}});}
+}
+function testNotification(){
+    sendDesktopNotif("BatiSense Pro","✅ Notification fonctionnelle! Les seuils d'alerte sont actifs.");
+    const msg=document.getElementById("thresh-msg");
+    msg.textContent="✓ Notification envoyée";
+    msg.style.opacity="1";
+    setTimeout(()=>{msg.textContent="✓ Enregistré";msg.style.opacity="0";},2500);
+}
+    }
+}
+document.addEventListener("DOMContentLoaded",()=>{renderThresholds();if("Notification"in window&&Notification.permission==="default")Notification.requestPermission();});
 /* ══ PWA Install ══ */
 let installPrompt=null;
 window.addEventListener("beforeinstallprompt",e=>{
