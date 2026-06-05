@@ -1954,11 +1954,47 @@ function initCharts() {
     CH.gas  = new Chart(document.getElementById("chartGas"),  {type:"line",data:{datasets:[]},options:lineOpts("m³")});
 }
 
+function chartColor(color, alpha=1) {
+    let value = String(color || "").trim();
+    const varMatch = value.match(/^var\((--[^)]+)\)$/);
+    if(varMatch) value = getComputedStyle(document.documentElement).getPropertyValue(varMatch[1]).trim();
+    if(/^#[0-9a-f]{3}$/i.test(value)){
+        value = "#" + value.slice(1).split("").map(ch=>ch+ch).join("");
+    }
+    const hex = value.match(/^#([0-9a-f]{6})$/i);
+    if(hex){
+        const n = parseInt(hex[1],16);
+        const r = (n >> 16) & 255;
+        const g = (n >> 8) & 255;
+        const b = n & 255;
+        return `rgba(${r},${g},${b},${alpha})`;
+    }
+    return value || `rgba(74,96,128,${alpha})`;
+}
+
 function mkDS(label,color,data,stepped=false) {
-    return {label,data,borderColor:color,backgroundColor:color+"18",borderWidth:2.5,tension:stepped?0:.5,fill:true,pointRadius:0,pointHoverRadius:6,stepped,pointHoverBorderWidth:3,pointHoverBorderColor:color};
+    const lineColor = chartColor(color);
+    return {
+        label,
+        data,
+        borderColor:lineColor,
+        backgroundColor:lineColor,
+        borderWidth:2.8,
+        tension:stepped ? 0 : .36,
+        fill:false,
+        pointRadius:2.6,
+        pointHoverRadius:6,
+        pointBackgroundColor:"#fff",
+        pointBorderColor:lineColor,
+        pointBorderWidth:2,
+        stepped,
+        pointHoverBorderWidth:3,
+        pointHoverBorderColor:lineColor
+    };
 }
 function mkBarDS(label,color,data) {
-    return {label,data,backgroundColor:color+"90",borderRadius:8,borderSkipped:false,hoverBackgroundColor:color};
+    const barColor = chartColor(color,.68);
+    return {label,data,backgroundColor:barColor,borderRadius:8,borderSkipped:false,hoverBackgroundColor:chartColor(color,.9)};
 }
 function toXY(rows) { return rows ? rows.map(r=>({x:new Date(r.t).getTime(),y:r.v})) : []; }
 
