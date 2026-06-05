@@ -1509,6 +1509,7 @@
         html[data-theme="light"] .city-search-input::placeholder{color:rgba(36,35,30,.3)!important}
         html[data-theme="light"] .city-results li{color:rgba(36,35,30,.7)!important}
         html[data-theme="light"] .city-results li:hover,html[data-theme="light"] .city-results li.highlight{background:rgba(241,200,75,.15)!important;color:#7a6a19!important}
+        @media(max-width:480px){html[data-theme="light"] .city-search-wrap{background:rgba(248,248,242,.98)!important}}
         html[data-theme="light"] .notif-btn{background:rgba(248,248,242,.86)!important;border-color:rgba(255,255,255,.58)!important;color:#24231e!important}
         html[data-theme="light"] .room-tab{background:rgba(255,255,255,.5)!important;border-color:rgba(0,0,0,.1)!important;color:#24231e!important}
         html[data-theme="light"] .room-tab.active{background:rgba(241,200,75,.3)!important;border-color:rgba(241,200,75,.5)!important;color:#7a6a19!important}
@@ -1831,6 +1832,59 @@
         .room-tab i{margin-right:5px}
         .app.hidden{display:none!important}
         .app.visible{display:grid!important}
+
+        /* ═══════════════ MOBILE RESPONSIVE ═══════════════ */
+        @media(max-width:480px){
+            :root{--sidebar-w:0px}
+            .sidebar{display:none}
+            .topbar{padding:8px 12px!important;min-height:52px!important;gap:6px!important}
+            .topbar h1{font-size:14px!important}
+            .topbar-l p{font-size:9px!important}
+            .topbar-l p span:not(.live-dot){display:none}
+            .topbar .btn{font-size:0!important;padding:0!important;width:34px;height:34px;border-radius:50%!important}
+            .topbar .btn i{font-size:14px!important;margin:0!important}
+            .install-btn{display:none!important}
+            #install-btn{display:none!important}
+            #overview{padding:104px 12px 16px!important;grid-template-columns:1fr!important;gap:10px!important}
+            #overview::before{font-size:22px!important;left:16px!important;top:24px!important;max-width:calc(100% - 32px)!important}
+            #overview::after{font-size:9px!important;left:17px!important;top:52px!important;max-width:calc(100% - 34px)!important;display:block!important}
+            .overview-summary{grid-template-columns:1fr!important}
+            .overview-summary>.panel{min-height:130px!important}
+            .avg-row{grid-template-columns:1fr 1fr!important;gap:8px!important}
+            .avg-card{padding:12px!important}
+            .avg-val{font-size:18px!important}
+            .weather-widget{padding:12px 14px!important;gap:12px!important}
+            .weather-icon-wrap{width:44px!important;height:44px!important;font-size:20px!important}
+            .weather-temp{font-size:24px!important}
+            .weather-detail-item{font-size:10px!important;padding:3px 8px!important}
+            .g4{grid-template-columns:1fr 1fr!important;gap:8px!important}
+            .g2{grid-template-columns:1fr!important;gap:8px!important}
+            .kcard{padding:12px!important}
+            .kcard .kc-icon{width:36px!important;height:36px!important;font-size:15px!important}
+            .kcard .kc-val{font-size:20px!important}
+            .kcard .kc-lbl{font-size:9px!important}
+            .room-tabs{overflow-x:auto;flex-wrap:nowrap;padding:0 0 4px;margin-bottom:10px!important;gap:4px!important}
+            .room-tab{white-space:nowrap;font-size:11px!important;padding:5px 12px!important}
+            .room-tab i{margin-right:3px!important}
+            .notif-dropdown{right:-60px;width:300px!important}
+            .house-widget{display:none!important}
+            .overview-temp .ph button{font-size:10px!important;padding:4px 10px!important}
+            #node-container{grid-template-columns:1fr!important;padding:12px!important}
+            .node-card{padding:14px!important}
+            .content{padding:8px!important}
+            .sec{padding:8px!important}
+            .topbar-r{gap:4px!important}
+            .account-panel{right:-50px;width:300px!important}
+            .city-search-wrap{position:fixed;top:auto;bottom:0;left:0;right:0;border-radius:16px 16px 0 0;max-height:60vh;box-shadow:0 -8px 30px rgba(0,0,0,.5)}
+            .city-results{max-height:40vh}
+        }
+        @media(max-width:380px){
+            .topbar-l p span:not(.live-dot):not(:first-of-type){display:none}
+            .topbar-l p span:first-of-type{font-size:8px!important}
+            .overview-summary>.panel{min-height:120px!important}
+            .weather-details{gap:6px!important}
+            .weather-detail-item{font-size:9px!important;padding:2px 6px!important}
+        }
     </style>
 </head>
 <body>
@@ -1955,6 +2009,9 @@
                 <div id="notif-list"></div>
             </div>
             <button class="btn" onclick="exportCSV()"><i class="fas fa-file-csv"></i> CSV</button>
+            <button class="btn install-btn" id="install-btn" style="display:none" title="Installer l'application">
+                <i class="fas fa-download"></i>
+            </button>
             <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()" type="button" aria-label="Changer le theme" aria-pressed="false">
                 <span class="theme-track">
                     <span class="theme-icon sun"><i class="fas fa-sun"></i></span>
@@ -3001,6 +3058,20 @@ document.addEventListener("DOMContentLoaded",()=>{
         });
     });
 });
+/* ══ PWA Install ══ */
+let installPrompt=null;
+window.addEventListener("beforeinstallprompt",e=>{
+    e.preventDefault();installPrompt=e;
+    document.getElementById("install-btn").style.display="";
+});
+document.getElementById("install-btn").addEventListener("click",async()=>{
+    if(!installPrompt) return;
+    installPrompt.prompt();
+    const res=await installPrompt.userChoice;
+    if(res.outcome==="accepted") document.getElementById("install-btn").style.display="none";
+    installPrompt=null;
+});
+window.addEventListener("appinstalled",()=>{document.getElementById("install-btn").style.display="none";});
 /* ══ Service Worker ══ */
 if("serviceWorker" in navigator){
     window.addEventListener("load",()=>{
