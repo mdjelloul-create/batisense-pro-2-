@@ -2790,7 +2790,7 @@ onAlertEvent=function(d){
     _origOnAlert(d);
     pushNotif(d.level,d.node_id,d.message,d.timestamp);
 };
-/* ══ Weather (Open-Meteo) ══ */
+/* ══ Weather (Open-Meteo + IP geo) ══ */
 const WMO_CODES = {
     0:{icon:"sunny",label:"Dégagé",fa:"fa-sun"},
     1:{icon:"sunny",label:"Peu nuageux",fa:"fa-sun"},
@@ -2816,14 +2816,23 @@ const WMO_CODES = {
 };
 async function loadWeather(){
     try{
-        let lat=48.8566, lon=2.3522;
-        const cached=localStorage.getItem("bs_weather_loc");
-        if(cached){const p=cached.split(",");lat=+p[0];lon=+p[1];}
-        else if("geolocation" in navigator){
+        let lat=48.8566, lon=2.3522, locText="";
+        for(const url of["http://ip-api.com/json/?fields=lat,lon,city,regionName","https://ipapi.co/json/","https://ipinfo.io/json"]){
+            try{
+                const g=await fetch(url,{signal:AbortSignal.timeout(3000)}).then(r=>r.json()).catch(()=>null);
+                if(!g) continue;
+                const glat=g.lat||g.latitude||(g.loc&&+g.loc.split(",")[0]);
+                const glon=g.lon||g.longitude||(g.loc&&+g.loc.split(",")[1]);
+                if(glat!=null&&glon!=null){lat=glat;lon=glon;}
+                const city=g.city||g.region||g.regionName;
+                if(city){locText=city+(g.region||g.regionName?`, ${g.region||g.regionName}`:"");}
+                break;
+            }catch{}
+        }
+        if(!locText&&"geolocation" in navigator){
             try{
                 const pos=await new Promise((res,rej)=>navigator.geolocation.getCurrentPosition(res,rej,{timeout:5000}));
                 lat=pos.coords.latitude;lon=pos.coords.longitude;
-                localStorage.setItem("bs_weather_loc",`${lat},${lon}`);
             }catch{}
         }
         const w=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m&timezone=auto`,{signal:AbortSignal.timeout(6000)}).then(r=>r.json());
@@ -2834,26 +2843,15 @@ async function loadWeather(){
         document.getElementById("weather-hum").textContent=hum;
         document.getElementById("weather-wind").textContent=Math.round(wind);
         document.getElementById("weather-desc").textContent=wmo.label;
+        if(locText) document.getElementById("weather-location").textContent=locText;
         const icon=document.getElementById("weather-icon");
         icon.className="weather-icon "+wmo.icon;
         icon.innerHTML=`<i class="fas ${wmo.fa}"></i>`;
-        loadLocation();
     }catch{
         document.getElementById("weather-temp").textContent="--";
         document.getElementById("weather-hum").textContent="--";
         document.getElementById("weather-wind").textContent="--";
         document.getElementById("weather-desc").textContent="Météo indisponible";
-    }
-}
-async function loadLocation(){
-    for(const url of["https://ipapi.co/json/","https://ipinfo.io/json","http://ip-api.com/json/?fields=city,region"]){
-        try{
-            const g=await fetch(url,{signal:AbortSignal.timeout(3000)}).then(r=>r.json()).catch(()=>null);
-            if(!g) continue;
-            const city=g.city||g.region;
-            const region=g.region||g.regionName||"";
-            if(city){document.getElementById("weather-location").textContent=city+(region?`, ${region}`:"");return;}
-        }catch{}
     }
 }
 /* ══ Room tabs ══ */
