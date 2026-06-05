@@ -1438,6 +1438,7 @@
         html[data-theme="dark"] .weather-widget{border-color:rgba(255,255,255,.1)!important}
         html[data-theme="dark"] .weather-temp,html[data-theme="dark"] .weather-location,html[data-theme="dark"] .weather-unit{color:#f7f7f2!important}
         html[data-theme="dark"] .weather-detail-item{background:rgba(255,255,255,.08)!important;color:rgba(247,247,242,.7)!important}
+        html[data-theme="dark"] .city-search-wrap{background:rgba(28,28,24,.97)!important}
         html[data-theme="dark"] .notif-btn{background:rgba(255,255,255,.1)!important;border-color:rgba(255,255,255,.15)!important;color:#f7f7f2!important}
         html[data-theme="dark"] .notif-dropdown{background:rgba(28,28,24,.96)!important;border-color:rgba(255,255,255,.13)!important;color:#f7f7f2!important}
         html[data-theme="dark"] .notif-header h3,html[data-theme="dark"] .notif-item-title{color:#f7f7f2!important}
@@ -1503,6 +1504,11 @@
         html[data-theme="light"] .weather-widget::before{display:none!important}
         html[data-theme="light"] .weather-temp,html[data-theme="light"] .weather-location,html[data-theme="light"] .weather-unit{color:#24231e!important}
         html[data-theme="light"] .weather-detail-item{background:rgba(0,0,0,.06)!important;color:rgba(36,35,30,.7)!important}
+        html[data-theme="light"] .city-search-wrap{background:rgba(248,248,242,.97)!important;border-color:rgba(0,0,0,.12)!important}
+        html[data-theme="light"] .city-search-input{background:rgba(0,0,0,.04)!important;border-color:rgba(0,0,0,.1)!important;color:#24231e!important}
+        html[data-theme="light"] .city-search-input::placeholder{color:rgba(36,35,30,.3)!important}
+        html[data-theme="light"] .city-results li{color:rgba(36,35,30,.7)!important}
+        html[data-theme="light"] .city-results li:hover,html[data-theme="light"] .city-results li.highlight{background:rgba(241,200,75,.15)!important;color:#7a6a19!important}
         html[data-theme="light"] .notif-btn{background:rgba(248,248,242,.86)!important;border-color:rgba(255,255,255,.58)!important;color:#24231e!important}
         html[data-theme="light"] .room-tab{background:rgba(255,255,255,.5)!important;border-color:rgba(0,0,0,.1)!important;color:#24231e!important}
         html[data-theme="light"] .room-tab.active{background:rgba(241,200,75,.3)!important;border-color:rgba(241,200,75,.5)!important;color:#7a6a19!important}
@@ -1723,6 +1729,28 @@
             border-radius:8px;
         }
         .weather-detail-item i{font-size:10px;width:14px;text-align:center;opacity:.7}
+        .weather-location{position:relative}
+        .city-search-wrap{
+            position:absolute;top:calc(100% + 6px);left:0;right:0;z-index:100;
+            background:rgba(28,28,24,.97);border:1px solid rgba(255,255,255,.13);
+            border-radius:12px;padding:8px;backdrop-filter:blur(16px);
+            display:none;box-shadow:0 8px 30px rgba(0,0,0,.4);
+        }
+        .city-search-wrap.open{display:block}
+        .city-search-input{
+            width:100%;box-sizing:border-box;padding:9px 12px;border-radius:8px;
+            border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);
+            color:#f7f7f2;font-size:13px;font-family:inherit;outline:none;
+        }
+        .city-search-input:focus{border-color:rgba(241,200,75,.4)}
+        .city-search-input::placeholder{color:rgba(255,255,255,.3)}
+        .city-results{list-style:none;margin:6px 0 0;padding:0;max-height:180px;overflow-y:auto}
+        .city-results li{
+            padding:8px 12px;border-radius:6px;cursor:pointer;
+            font-size:12px;color:rgba(255,255,255,.7);transition:all .15s;
+        }
+        .city-results li:hover,.city-results li.highlight{background:rgba(241,200,75,.12);color:#f4c84d}
+        .city-results li .city-meta{font-size:10px;color:rgba(255,255,255,.35);margin-left:6px}
 
         /* ═══════════════ NOTIFICATION BELL ═══════════════ */
         .notif-btn{
@@ -2028,6 +2056,10 @@
                                 <span class="weather-detail-item" id="weather-desc"><i class="fas fa-cloud-sun"></i> Chargement…</span>
                             </div>
                         </div>
+                    </div>
+                    <div class="city-search-wrap" id="city-search">
+                        <input type="text" class="city-search-input" id="city-search-input" placeholder="Rechercher une ville…" autocomplete="off">
+                        <ul class="city-results" id="city-results"></ul>
                     </div>
                     <div class="panel" style="margin-bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:150px;position:relative;">
                     <div class="pt" style="margin-bottom:0;font-size:10px;color:var(--t2);position:absolute;top:12px;left:16px;"><i class="fas fa-cube"></i> Modèle 3D interactif</div>
@@ -2906,28 +2938,49 @@ async function loadWeather(savedLoc){
         document.getElementById("weather-desc").textContent="Météo indisponible";
     }
 }
-async function setWeatherCity(name){
-    try{
-        const g=await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(name)}&count=1&language=fr&format=json`,{signal:AbortSignal.timeout(5000)}).then(r=>r.json());
-        if(g&&g.results&&g.results[0]){
-            const r=g.results[0];
-            const locText=r.name+(r.admin1?`, ${r.admin1}`:"");
-            localStorage.setItem("bs_weather_city",`${r.latitude}|${r.longitude}|${locText}`);
-            document.getElementById("weather-location").textContent=locText;
-            loadWeather();
-        }else alert("Ville non trouvée");
-    }catch{alert("Erreur de recherche");}
-}
 async function redetectLocation(){
     localStorage.removeItem("bs_weather_city");
     document.getElementById("weather-location").textContent="Détection…";
     loadWeather();
 }
 document.addEventListener("DOMContentLoaded",()=>{
-    const editBtn=document.getElementById("weather-edit");
-    if(editBtn) editBtn.addEventListener("click",(e)=>{e.stopPropagation();const input=prompt("Entrez le nom de votre ville (ex: Paris):");if(input&&input.trim()) setWeatherCity(input.trim());});
-    const redetectBtn=document.getElementById("weather-redetect");
-    if(redetectBtn) redetectBtn.addEventListener("click",(e)=>{e.stopPropagation();redetectLocation();});
+    const ed=document.getElementById("weather-edit");
+    const rd=document.getElementById("weather-redetect");
+    const cs=document.getElementById("city-search");
+    const ci=document.getElementById("city-search-input");
+    const cr=document.getElementById("city-results");
+    let hideTimer;
+    function showSearch(){cs.classList.add("open");ci.value="";cr.innerHTML="";setTimeout(()=>ci.focus(),50);}
+    function hideSearch(){cs.classList.remove("open");}
+    if(ed) ed.addEventListener("click",(e)=>{e.stopPropagation();showSearch();});
+    if(rd) rd.addEventListener("click",(e)=>{e.stopPropagation();redetectLocation();});
+    if(ci){
+        ci.addEventListener("input",async function(){
+            clearTimeout(ci._t);
+            const q=this.value.trim();
+            if(q.length<2){cr.innerHTML="";return;}
+            ci._t=setTimeout(async()=>{
+                try{
+                    const g=await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(q)}&count=6&language=fr&format=json`,{signal:AbortSignal.timeout(5000)}).then(r=>r.json());
+                    cr.innerHTML="";
+                    if(g&&g.results) g.results.forEach(r=>{
+                        const li=document.createElement("li");
+                        li.innerHTML=`${r.name}<span class="city-meta">${r.admin1||r.country||""}</span>`;
+                        li.addEventListener("click",()=>{
+                            const locText=r.name+(r.admin1?`, ${r.admin1}`:"");
+                            localStorage.setItem("bs_weather_city",`${r.latitude}|${r.longitude}|${locText}`);
+                            document.getElementById("weather-location").textContent=locText;
+                            hideSearch();
+                            loadWeather();
+                        });
+                        cr.appendChild(li);
+                    });
+                }catch{}
+            },300);
+        });
+        ci.addEventListener("keydown",(e)=>{if(e.key==="Escape")hideSearch();if(e.key==="Enter"){const f=cr.querySelector("li");if(f)f.click();}});
+    }
+    document.addEventListener("click",(e)=>{if(!e.target.closest("#city-search")&&!e.target.closest("#weather-edit"))hideSearch();});
 });
 /* ══ Room tabs ══ */
 document.addEventListener("DOMContentLoaded",()=>{
