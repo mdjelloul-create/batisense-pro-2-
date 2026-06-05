@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+.env
+batisense.db
+node_modules/
+frontend/dist/
+frontend/node_modules/
+*.egg-info/
+venv/
+.venv/
+github-batisense-pro-2/

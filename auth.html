@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BatiSense Pro - Connexion</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Crect width='48' height='48' rx='10' fill='%23050810'/%3E%3Cpolygon points='24,6 40,22 40,40 8,40 8,22' fill='none' stroke='%2300f5a0' stroke-width='3' stroke-linejoin='round'/%3E%3Ccircle cx='24' cy='30' r='4' fill='%2300f5a0'/%3E%3Ccircle cx='24' cy='10' r='3' fill='%2300d4e0'/%3E%3Cpath d='M20,30 L24,24 L28,30' fill='none' stroke='%2300f5a0' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Syne:wght@600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+:root{
+  --bg0:#2f2a18;
+  --bg1:#16140e;
+  --bg2:rgba(238,238,231,.58);
+  --bg3:rgba(255,255,255,.34);
+  --bg4:rgba(255,255,255,.22);
+  --b0:rgba(255,255,255,.30);
+  --b1:rgba(255,255,255,.44);
+  --b2:rgba(0,0,0,.12);
+  --green:#8ecf7b;
+  --teal:#74bfc2;
+  --blue:#8ea8d8;
+  --amber:#f4c84d;
+  --red:#d35b4d;
+  --violet:#a995c8;
+  --t0:#f7f7f2;
+  --t1:rgba(255,255,255,.72);
+  --t2:rgba(255,255,255,.54);
+  --card-bg:rgba(244,245,241,.84);
+  --card-border:rgba(255,255,255,.58);
+  --card-shadow:0 18px 55px rgba(0,0,0,.22);
+  --card-hover-shadow:0 24px 70px rgba(0,0,0,.28);
+  --r:20px;
+  --rsm:14px;
+  --rxs:10px;
+  --sidebar-w:72px;
+  --fui:'Inter',sans-serif;
+  --fmono:'DM Mono',monospace;
+  --fbody:'Inter',sans-serif;
+}
+[data-theme="light"]{
+  --bg0:#c7c2aa;
+  --bg1:#eeeadd;
+  --t0:#24231e;
+  --t1:rgba(36,35,30,.68);
+  --t2:rgba(36,35,30,.48);
+  --card-bg:rgba(255,255,255,.86);
+  --card-border:rgba(255,255,255,.70);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:14px;-webkit-font-smoothing:antialiased}
+body{
+  min-height:100vh;
+  font-family:var(--fbody);
+  color:var(--t0);
+  overflow-x:hidden;
+  background:
+    radial-gradient(circle at 20% 10%,rgba(255,255,255,.10),transparent 28%),
+    linear-gradient(135deg,var(--bg0),var(--bg1) 72%);
+}
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  opacity:.14;
+  background-image:linear-gradient(135deg,rgba(255,255,255,.13) 1px,transparent 1px);
+  background-size:24px 24px;
+}
+button,input{font:inherit}
+button{font-family:var(--fui);cursor:pointer}
+
+#welcome-overlay{
+  position:fixed;
+  inset:0;
+  z-index:1000;
+  background:#2f2a18;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:18px;
+}
+#welcome-overlay.hide{animation:overlayOut .7s cubic-bezier(.76,0,.24,1) forwards;pointer-events:none}
+@keyframes overlayOut{0%{opacity:1;transform:scale(1)}30%{opacity:1;transform:scale(1.02)}100%{opacity:0;transform:scale(.95)}}
+.wov-logo{
+  width:76px;
+  height:76px;
+  border-radius:24px;
+  display:grid;
+  place-items:center;
+  background:var(--amber);
+  color:#24231e;
+  box-shadow:0 22px 55px rgba(0,0,0,.30);
+  animation:wovLogoIn .9s cubic-bezier(.34,1.56,.64,1) both;
+}
+.wov-logo::before{content:"\f015";font-family:"Font Awesome 6 Free";font-weight:900;font-size:30px}
+.wov-text{font-size:34px;font-weight:900;letter-spacing:-.04em;color:#fff;animation:wovTextIn .6s ease both .25s}
+.wov-user{font-size:15px;color:rgba(255,255,255,.68);animation:wovTextIn .6s ease both .4s}
+.wov-bar-wrap{width:240px;animation:wovTextIn .6s ease both .55s}
+.wov-bar{height:3px;background:rgba(255,255,255,.18);border-radius:3px;overflow:hidden}
+.wov-bar-fill{height:100%;width:0;background:var(--amber);animation:wovFill 1.35s cubic-bezier(.4,0,.2,1) forwards .35s}
+.wov-hint{font-family:var(--fmono);font-size:10px;color:rgba(255,255,255,.42);letter-spacing:2px;text-align:center;margin-top:8px}
+@keyframes wovLogoIn{from{opacity:0;transform:scale(.3) rotateY(-180deg)}to{opacity:1;transform:scale(1) rotateY(0deg)}}
+@keyframes wovTextIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes wovFill{to{width:100%}}
+
+.app{
+  position:relative;
+  z-index:1;
+  min-height:100vh;
+  display:grid;
+  grid-template-columns:84px minmax(0,1fr);
+  gap:18px;
+  padding:26px;
+  align-items:start;
+}
+.sidebar{
+  width:72px;
+  position:sticky;
+  top:26px;
+  border-radius:30px;
+  padding:12px 10px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:14px;
+  background:linear-gradient(180deg,rgba(246,246,239,.72),rgba(222,221,210,.56));
+  border:1px solid rgba(255,255,255,.62);
+  box-shadow:0 22px 55px rgba(0,0,0,.28);
+  backdrop-filter:blur(20px) saturate(140%);
+  -webkit-backdrop-filter:blur(20px) saturate(140%);
+}
+.s-logo{
+  width:50px;
+  height:50px;
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  background:#f3f1e7;
+  color:#25241f;
+  box-shadow:inset 0 0 0 6px rgba(142,207,123,.26),0 12px 24px rgba(0,0,0,.12);
+}
+.s-logo::before{content:"\f015";font-family:"Font Awesome 6 Free";font-weight:900;font-size:18px}
+.s-nav{display:flex;flex-direction:column;align-items:center;gap:11px;width:100%}
+.nav-btn{
+  width:50px;
+  height:50px;
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  background:rgba(255,255,255,.62);
+  color:#24231e;
+  border:1px solid rgba(255,255,255,.66);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.55),0 10px 22px rgba(0,0,0,.10);
+  text-decoration:none;
+  transition:transform .2s ease,background .2s ease,box-shadow .2s ease;
+}
+.nav-btn i{font-size:16px}
+.nav-btn:hover,.nav-btn.active{background:var(--amber);transform:translateY(-2px);box-shadow:0 14px 24px rgba(0,0,0,.18)}
+.s-footer{
+  padding-top:10px;
+  display:flex;
+  justify-content:center;
+  gap:8px;
+  width:100%;
+  border-top:1px solid rgba(255,255,255,.42);
+}
+.conn{width:16px;height:16px;padding:0;display:grid;place-items:center;border-radius:50%;background:rgba(255,255,255,.36)}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--green);box-shadow:0 0 0 6px rgba(142,207,123,.18)}
+.dot.api{background:var(--amber);box-shadow:0 0 0 6px rgba(244,200,77,.18)}
+
+.main{min-width:0}
+.topbar{
+  min-height:58px;
+  margin-bottom:16px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+}
+.topbar-l h1{font-size:16px;font-weight:900;letter-spacing:-.03em}
+.topbar-l p{font-size:10.5px;color:var(--t1);margin-top:2px;font-family:var(--fbody);display:flex;align-items:center;gap:7px}
+.live-dot{width:9px;height:9px;border-radius:50%;background:var(--green);box-shadow:0 0 0 6px rgba(142,207,123,.18)}
+.topbar-r{display:flex;gap:8px;align-items:center}
+.btn{
+  min-height:34px;
+  border:1px solid var(--b1);
+  border-radius:999px;
+  padding:8px 13px;
+  color:#24231e;
+  background:rgba(255,255,255,.58);
+  font-size:12px;
+  font-weight:900;
+  box-shadow:none;
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  transition:transform .2s ease,background .2s ease,border-color .2s ease;
+}
+.btn:hover,.btn.active{background:var(--amber);color:#24231e;transform:translateY(-1px);border-color:rgba(255,255,255,.62)}
+.theme-toggle{
+  width:74px;
+  height:38px;
+  padding:0;
+  border:1px solid rgba(255,255,255,.54);
+  border-radius:999px;
+  background:rgba(255,255,255,.52);
+  color:#24231e;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.72),0 10px 24px rgba(0,0,0,.12);
+  position:relative;
+  overflow:hidden;
+}
+.theme-track{position:absolute;inset:0;display:flex;align-items:center;justify-content:space-between;padding:0 10px}
+.theme-icon{width:18px;height:18px;display:grid;place-items:center;font-size:13px;opacity:.55;z-index:1}
+.theme-icon.sun{color:#b87a00}.theme-icon.moon{color:#28304d}
+.theme-thumb{
+  position:absolute;
+  left:4px;
+  top:4px;
+  width:30px;
+  height:30px;
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  background:linear-gradient(135deg,#2b2a25,#11100d);
+  color:#f4c84d;
+  box-shadow:0 8px 18px rgba(0,0,0,.24);
+  transition:transform .28s cubic-bezier(.34,1.56,.64,1),background .28s,color .28s;
+  z-index:2;
+}
+.theme-toggle.light .theme-thumb{transform:translateX(36px);background:linear-gradient(135deg,#ffd96a,#f4b63d);color:#24231e}
+
+.auth-surface{
+  min-height:calc(100vh - 126px);
+  border-radius:30px;
+  overflow:hidden;
+  position:relative;
+  padding:24px;
+  background-color:#211f17;
+  background:
+    radial-gradient(circle at 78% 16%,rgba(244,200,77,.30),transparent 34%),
+    linear-gradient(180deg,rgba(255,246,214,.10),rgba(0,0,0,.26) 58%,rgba(0,0,0,.52)),
+    linear-gradient(90deg,rgba(15,14,10,.78),rgba(15,14,10,.28) 48%,rgba(15,14,10,.56)),
+    url("https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1800&q=80") center 46%/cover;
+  background-blend-mode:screen,multiply,normal,normal;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.18),inset 0 -140px 150px rgba(0,0,0,.34),0 30px 80px rgba(0,0,0,.35);
+}
+.auth-surface::before{
+  content:"BatiSense Home";
+  position:absolute;
+  left:28px;
+  top:28px;
+  color:#fff;
+  font-size:31px;
+  font-weight:900;
+  letter-spacing:-.06em;
+  z-index:1;
+}
+.auth-surface::after{
+  content:"Ready to control your smart home?";
+  position:absolute;
+  left:28px;
+  top:66px;
+  color:rgba(255,255,255,.82);
+  font-size:13px;
+  z-index:1;
+}
+.auth-grid{
+  position:relative;
+  z-index:2;
+  min-height:calc(100vh - 174px);
+  display:grid;
+  grid-template-columns:minmax(280px,1fr) minmax(360px,460px);
+  gap:18px;
+  align-items:end;
+}
+.preview-column{display:grid;grid-template-columns:repeat(2,minmax(180px,1fr));gap:12px;align-self:end;max-width:560px}
+.kcard,.panel,.auth-card{
+  background:var(--card-bg);
+  border:1px solid var(--card-border);
+  box-shadow:var(--card-shadow);
+  backdrop-filter:blur(18px) saturate(130%);
+  -webkit-backdrop-filter:blur(18px) saturate(130%);
+  color:#24231e;
+  border-radius:var(--r);
+}
+.kcard{min-height:132px;padding:15px;position:relative;overflow:hidden;transition:transform .25s ease,box-shadow .25s ease}
+.kcard:hover,.panel:hover,.auth-card:hover{transform:translateY(-2px);box-shadow:var(--card-hover-shadow)}
+.kcard-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.kcard-lbl{font-size:13px;line-height:1;font-weight:900;color:#24231e}
+.kcard-icon{
+  width:34px;
+  height:34px;
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  color:#24231e;
+  background:rgba(255,255,255,.64);
+}
+.kcard-val{font-size:24px;font-weight:900;letter-spacing:-.05em;line-height:1.1;margin-top:8px}
+.kcard-sub{font-size:11px;color:#67665e;margin-top:7px}
+.panel{padding:15px;grid-column:1/-1}
+.pt{font-size:11px;font-weight:900;color:#24231e;display:flex;align-items:center;gap:8px}
+.pt i{color:var(--amber)}
+.mini-bars{height:78px;display:flex;align-items:end;gap:8px;margin-top:16px}
+.mini-bars span{flex:1;border-radius:999px 999px 8px 8px;background:linear-gradient(180deg,var(--amber),rgba(244,200,77,.28));min-height:22px}
+.mini-bars span:nth-child(2){height:66px}.mini-bars span:nth-child(3){height:44px;background:linear-gradient(180deg,var(--green),rgba(142,207,123,.25))}.mini-bars span:nth-child(4){height:72px}.mini-bars span:nth-child(5){height:52px;background:linear-gradient(180deg,var(--teal),rgba(116,191,194,.25))}
+
+.auth-card{
+  padding:18px;
+  align-self:center;
+  transition:transform .25s ease,box-shadow .25s ease;
+}
+.auth-head{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:14px}
+.auth-title{font-size:18px;font-weight:900;letter-spacing:-.03em}
+.auth-sub{font-size:12px;color:#66645b;margin-top:3px;line-height:1.45}
+.user-av{
+  width:38px;
+  height:38px;
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  background:#24231e;
+  color:#fff;
+  font-weight:900;
+  flex-shrink:0;
+}
+.tabs{display:flex;gap:6px;padding:5px;border-radius:999px;background:rgba(255,255,255,.48);border:1px solid rgba(255,255,255,.58);margin-bottom:15px}
+.tab-btn{
+  min-height:34px;
+  flex:1;
+  border:0;
+  border-radius:999px;
+  padding:8px 10px;
+  background:transparent;
+  color:#69685f;
+  font-size:12px;
+  font-weight:900;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  position:relative;
+  overflow:hidden;
+}
+.tab-btn.active{background:var(--amber);color:#24231e;box-shadow:0 10px 20px rgba(0,0,0,.10)}
+.form-section{display:none}
+.form-section.active{display:block;animation:sectionIn .22s ease}
+@keyframes sectionIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.field{margin-bottom:11px}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+label{display:block;font-size:10px;font-weight:900;color:#77766d;text-transform:uppercase;margin-bottom:6px}
+.input-wrap{position:relative}
+.input-wrap i{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:#77766d;font-size:12px;pointer-events:none}
+input{
+  width:100%;
+  min-height:40px;
+  border:1px solid rgba(0,0,0,.12);
+  border-radius:12px;
+  padding:8px 11px;
+  background:rgba(255,255,255,.78);
+  color:#24231e;
+  outline:none;
+  font-size:13px;
+}
+.input-wrap input{padding-left:34px}
+input:focus{border-color:rgba(244,200,77,.88);box-shadow:0 0 0 4px rgba(244,200,77,.18);background:rgba(255,255,255,.95)}
+.form-divider{display:flex;align-items:center;gap:9px;margin:14px 0 10px;color:#77766d;font-size:10px;text-transform:uppercase;font-weight:900}
+.form-divider::before,.form-divider::after{content:"";height:1px;background:rgba(0,0,0,.10);flex:1}
+.msg{display:none;align-items:center;gap:8px;border-radius:12px;padding:9px 11px;font-size:12px;line-height:1.4;margin-top:3px}
+.msg.show{display:flex}
+.msg.error{background:rgba(211,91,77,.13);color:#8b2d24;border:1px solid rgba(211,91,77,.22)}
+.msg.success{background:rgba(142,207,123,.16);color:#2f6d31;border:1px solid rgba(142,207,123,.28)}
+.btn-submit{
+  width:100%;
+  min-height:42px;
+  border:1px solid rgba(255,255,255,.62);
+  border-radius:999px;
+  padding:10px 14px;
+  background:var(--amber);
+  color:#24231e;
+  font-size:13px;
+  font-weight:900;
+  margin-top:14px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  position:relative;
+  overflow:hidden;
+  transition:transform .2s ease,box-shadow .2s ease;
+}
+.btn-submit:hover{transform:translateY(-1px);box-shadow:0 14px 24px rgba(0,0,0,.18)}
+.btn-submit:disabled{opacity:.62;cursor:not-allowed;transform:none}
+.spinner{display:none;width:15px;height:15px;border:2px solid rgba(36,35,30,.25);border-top-color:#24231e;border-radius:50%;animation:spin .65s linear infinite}
+.btn-submit.loading .spinner{display:block}
+.btn-submit.loading .btn-label{display:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ripple{position:absolute;border-radius:50%;background:rgba(255,255,255,.35);transform:scale(0);animation:rippleAnim .6s ease-out;pointer-events:none}
+@keyframes rippleAnim{to{transform:scale(4);opacity:0}}
+
+@media(max-width:980px){
+  .app{grid-template-columns:70px minmax(0,1fr);gap:14px;padding:18px}
+  .auth-grid{grid-template-columns:1fr;align-items:start}
+  .preview-column{max-width:none}
+  .auth-card{max-width:520px;justify-self:end;width:100%}
+}
+@media(max-width:720px){
+  .app{grid-template-columns:1fr;padding:14px}
+  .sidebar{position:relative;top:0;width:100%;height:66px;flex-direction:row;border-radius:26px;justify-content:space-between}
+  .s-nav{flex-direction:row;width:auto}.s-footer{width:auto;border-top:0;padding-top:0}
+  .topbar{align-items:flex-start}.topbar-r{flex-wrap:wrap;justify-content:flex-end}
+  .auth-surface{padding:18px;border-radius:24px}.auth-surface::before{font-size:25px}.auth-surface::after{top:58px}
+  .auth-grid{padding-top:70px;min-height:auto}.preview-column{grid-template-columns:1fr 1fr}
+}
+@media(max-width:560px){
+  .nav-btn,.s-logo{width:42px;height:42px}.sidebar{padding:10px}
+  .preview-column{display:none}
+  .auth-surface{padding:14px}
+  .auth-grid{padding-top:72px}
+  .field-row{grid-template-columns:1fr}
+  .topbar{display:block}.topbar-r{margin-top:10px;justify-content:flex-start}
+}
+</style>
+</head>
+<body>
+<div id="welcome-overlay">
+  <div class="wov-logo"></div>
+  <div class="wov-text">BatiSense Pro</div>
+  <div class="wov-user">Connexion au dashboard</div>
+  <div class="wov-bar-wrap">
+    <div class="wov-bar"><div class="wov-bar-fill"></div></div>
+    <div class="wov-hint">ESPACE SECURISE</div>
+  </div>
+</div>
+
+<div class="app" id="app" style="opacity:0;transition:opacity .6s ease">
+  <aside class="sidebar" aria-label="Navigation">
+    <div class="s-logo" title="BatiSense Pro"></div>
+    <nav class="s-nav">
+      <a class="nav-btn active" href="#" title="Connexion"><i class="fas fa-right-to-bracket"></i></a>
+      <a class="nav-btn" href="#" title="Capteurs"><i class="fas fa-microchip"></i></a>
+      <a class="nav-btn" href="#" title="Consommation"><i class="fas fa-chart-pie"></i></a>
+      <a class="nav-btn" href="#" title="Alertes"><i class="fas fa-bell"></i></a>
+    </nav>
+    <div class="s-footer">
+      <div class="conn" title="Session"><span class="dot"></span></div>
+      <div class="conn" title="API"><span class="dot api"></span></div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div class="topbar-l">
+        <h1 id="page-title">Connexion</h1>
+        <p><span class="live-dot"></span> Acces securise au tableau de bord</p>
+      </div>
+      <div class="topbar-r">
+        <button class="btn active" type="button"><i class="fas fa-house"></i> BatiSense</button>
+        <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()" type="button" aria-label="Changer le theme" aria-pressed="false">
+          <span class="theme-track">
+            <span class="theme-icon sun"><i class="fas fa-sun"></i></span>
+            <span class="theme-thumb"><i class="fas fa-moon"></i></span>
+            <span class="theme-icon moon"><i class="fas fa-moon"></i></span>
+          </span>
+        </button>
+      </div>
+    </header>
+
+    <section class="auth-surface">
+      <div class="auth-grid">
+        <div class="preview-column" aria-hidden="true">
+          <div class="kcard">
+            <div class="kcard-top"><span class="kcard-lbl">Cuisine</span><i class="fas fa-utensils kcard-icon"></i></div>
+            <div class="kcard-val">--<sup> C</sup></div>
+            <div class="kcard-sub">Humidite: --%</div>
+          </div>
+          <div class="kcard">
+            <div class="kcard-top"><span class="kcard-lbl">Salon</span><i class="fas fa-couch kcard-icon"></i></div>
+            <div class="kcard-val">--<sup> C</sup></div>
+            <div class="kcard-sub">Presence: en attente</div>
+          </div>
+          <div class="panel">
+            <div class="pt"><i class="fas fa-chart-line"></i> Activite capteurs</div>
+            <div class="mini-bars"><span style="height:38px"></span><span></span><span></span><span></span><span></span></div>
+          </div>
+        </div>
+
+        <section class="auth-card" id="login-card">
+          <div class="auth-head">
+            <div>
+              <h2 class="auth-title" id="panel-title">Connexion</h2>
+              <p class="auth-sub" id="panel-sub">Ouvrez votre espace de suivi maison.</p>
+            </div>
+            <div class="user-av"><i class="fas fa-user"></i></div>
+          </div>
+
+          <div class="tabs" role="tablist" aria-label="Authentification">
+            <button class="tab-btn active" id="tab-login" type="button" onclick="switchTab('login')"><i class="fas fa-sign-in-alt"></i> Connexion</button>
+            <button class="tab-btn" id="tab-register" type="button" onclick="switchTab('register')"><i class="fas fa-user-plus"></i> Compte</button>
+          </div>
+
+          <div class="form-section active" id="section-login">
+            <div class="field">
+              <label for="login-email">Adresse e-mail</label>
+              <div class="input-wrap"><i class="fas fa-envelope"></i><input type="email" id="login-email" placeholder="votre@email.com" autocomplete="email"></div>
+            </div>
+            <div class="field">
+              <label for="login-password">Mot de passe</label>
+              <div class="input-wrap"><i class="fas fa-lock"></i><input type="password" id="login-password" placeholder="********" autocomplete="current-password"></div>
+            </div>
+            <div class="msg" id="login-msg"></div>
+            <button class="btn-submit" id="login-btn" type="button" onclick="doLogin()"><span class="spinner"></span><span class="btn-label"><i class="fas fa-arrow-right"></i> Se connecter</span></button>
+          </div>
+
+          <div class="form-section" id="section-register">
+            <div class="field field-row">
+              <div><label for="reg-firstname">Prenom</label><input type="text" id="reg-firstname" placeholder="Jean" autocomplete="given-name"></div>
+              <div><label for="reg-lastname">Nom</label><input type="text" id="reg-lastname" placeholder="Dupont" autocomplete="family-name"></div>
+            </div>
+            <div class="field">
+              <label for="reg-email">Adresse e-mail</label>
+              <div class="input-wrap"><i class="fas fa-envelope"></i><input type="email" id="reg-email" placeholder="votre@email.com" autocomplete="email"></div>
+            </div>
+            <div class="field">
+              <label for="reg-password">Mot de passe</label>
+              <div class="input-wrap"><i class="fas fa-lock"></i><input type="password" id="reg-password" placeholder="8 caracteres minimum" autocomplete="new-password"></div>
+            </div>
+            <div class="form-divider">Adresse du batiment</div>
+            <div class="field">
+              <label for="reg-street">Rue</label>
+              <div class="input-wrap"><i class="fas fa-location-dot"></i><input type="text" id="reg-street" placeholder="12 rue de la Paix" autocomplete="street-address"></div>
+            </div>
+            <div class="field field-row">
+              <div><label for="reg-city">Ville</label><input type="text" id="reg-city" placeholder="Paris" autocomplete="address-level2"></div>
+              <div><label for="reg-zip">Code postal</label><input type="text" id="reg-zip" placeholder="75001" autocomplete="postal-code"></div>
+            </div>
+            <div class="msg" id="register-msg"></div>
+            <button class="btn-submit" id="register-btn" type="button" onclick="doRegister()"><span class="spinner"></span><span class="btn-label"><i class="fas fa-user-plus"></i> Creer mon compte</span></button>
+          </div>
+        </section>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+"use strict";
+const API_BASE = "https://batisense-production.up.railway.app";
+const DASHBOARD_URL = location.protocol === "file:" || location.pathname.endsWith(".html") ? "index.html" : "/dashboard";
+const LOCAL_ACCOUNT_KEY = "bs_local_account";
+const LOCAL_SESSION_KEY = "bs_local_session";
+
+document.addEventListener("DOMContentLoaded", () => {
+  loadTheme();
+  setTimeout(() => {
+    document.getElementById("welcome-overlay").classList.add("hide");
+    document.getElementById("app").style.opacity = "1";
+  }, 900);
+});
+
+function switchTab(tab) {
+  const isLogin = tab === "login";
+  document.getElementById("section-login").classList.toggle("active", isLogin);
+  document.getElementById("section-register").classList.toggle("active", !isLogin);
+  document.getElementById("tab-login").classList.toggle("active", isLogin);
+  document.getElementById("tab-register").classList.toggle("active", !isLogin);
+  document.getElementById("panel-title").textContent = isLogin ? "Connexion" : "Creation de compte";
+  document.getElementById("panel-sub").textContent = isLogin ? "Ouvrez votre espace de suivi maison." : "Ajoutez vos informations pour connecter votre batiment.";
+  clearMsgs();
+}
+function clearMsgs() {
+  ["login-msg","register-msg"].forEach(id => {
+    const el = document.getElementById(id);
+    el.className = "msg";
+    el.textContent = "";
+  });
+}
+function showMsg(id, text, type) {
+  const el = document.getElementById(id);
+  el.className = `msg ${type} show`;
+  el.innerHTML = `<i class="fas ${type === "error" ? "fa-exclamation-circle" : "fa-check-circle"}"></i><span>${escapeHtml(text)}</span>`;
+}
+function setLoading(btnId, loading) {
+  const btn = document.getElementById(btnId);
+  btn.classList.toggle("loading", loading);
+  btn.disabled = loading;
+}
+async function doLogin() {
+  const rawEmail = document.getElementById("login-email").value.trim();
+  const email = normalizeEmail(rawEmail);
+  const password = document.getElementById("login-password").value;
+  if (!email || !password) {
+    showMsg("login-msg","Veuillez remplir tous les champs.","error");
+    return;
+  }
+  setLoading("login-btn", true);
+  clearMsgs();
+  try {
+    const first = await postAuthJson("/auth/login", { email, password });
+    if (first.ok) {
+      await cacheLocalAuthFromServer(email, password);
+      showMsg("login-msg","Connexion reussie. Redirection...","success");
+      setTimeout(() => window.location.href = DASHBOARD_URL, 800);
+    } else {
+      const shouldRetry = /exist|not found|unknown|introuvable/i.test(first.error || "");
+      if (shouldRetry && rawEmail && rawEmail !== email) {
+        const retry = await postAuthJson("/auth/login", { email: rawEmail, password });
+        if (retry.ok) {
+          await cacheLocalAuthFromServer(rawEmail, password);
+          showMsg("login-msg","Connexion reussie. Redirection...","success");
+          setTimeout(() => window.location.href = DASHBOARD_URL, 800);
+          return;
+        }
+        const local = await tryLocalLogin(rawEmail, password);
+        if (local.ok) {
+          showMsg("login-msg","Connexion locale reussie. Redirection...","success");
+          setTimeout(() => window.location.href = DASHBOARD_URL, 800);
+          return;
+        }
+        showMsg("login-msg", retry.error || first.error || local.error || "Erreur de connexion.", "error");
+      } else {
+        const local = await tryLocalLogin(email, password);
+        if (local.ok) {
+          showMsg("login-msg","Connexion locale reussie. Redirection...","success");
+          setTimeout(() => window.location.href = DASHBOARD_URL, 800);
+          return;
+        }
+        showMsg("login-msg", first.error || local.error || "Erreur de connexion.", "error");
+      }
+      setLoading("login-btn", false);
+    }
+  } catch {
+    const local = await tryLocalLogin(email, password);
+    if (local.ok) {
+      showMsg("login-msg","Connexion locale reussie. Redirection...","success");
+      setTimeout(() => window.location.href = DASHBOARD_URL, 800);
+      return;
+    }
+    showMsg("login-msg", local.error || "Impossible de joindre le serveur.","error");
+    setLoading("login-btn", false);
+  }
+}
+async function doRegister() {
+  const payload = {
+    first_name: document.getElementById("reg-firstname").value.trim(),
+    last_name: document.getElementById("reg-lastname").value.trim(),
+    email: normalizeEmail(document.getElementById("reg-email").value),
+    password: document.getElementById("reg-password").value,
+    street: document.getElementById("reg-street").value.trim(),
+    city: document.getElementById("reg-city").value.trim(),
+    zip_code: document.getElementById("reg-zip").value.trim()
+  };
+  for (const value of Object.values(payload)) {
+    if (!value) {
+      showMsg("register-msg","Veuillez remplir tous les champs.","error");
+      return;
+    }
+  }
+  if (payload.password.length < 8) {
+    showMsg("register-msg","Le mot de passe doit contenir au moins 8 caracteres.","error");
+    return;
+  }
+  setLoading("register-btn", true);
+  clearMsgs();
+  try {
+    const result = await postAuthJson("/auth/register", payload);
+    if (result.ok) {
+      await storeLocalAccount(payload);
+      showMsg("register-msg","Compte cree. Redirection...","success");
+      setTimeout(() => window.location.href = DASHBOARD_URL, 900);
+    } else {
+      showMsg("register-msg", result.error || "Erreur lors de la creation.", "error");
+      setLoading("register-btn", false);
+    }
+  } catch {
+    showMsg("register-msg","Impossible de joindre le serveur.","error");
+    setLoading("register-btn", false);
+  }
+}
+function toggleTheme() {
+  const next = document.documentElement.getAttribute("data-theme") === "light" ? "dark" : "light";
+  applyTheme(next);
+  localStorage.setItem("bs_theme", next);
+}
+function loadTheme() {
+  applyTheme(localStorage.getItem("bs_theme") || "dark");
+}
+function normalizeEmail(value) {
+  return String(value || "").trim().toLowerCase();
+}
+async function hashPassword(password) {
+  const bytes = new TextEncoder().encode(String(password || ""));
+  const hash = await crypto.subtle.digest("SHA-256", bytes);
+  return Array.from(new Uint8Array(hash), b => b.toString(16).padStart(2, "0")).join("");
+}
+async function storeLocalAccount(payload) {
+  const record = {
+    email: normalizeEmail(payload.email),
+    first_name: payload.first_name || "",
+    last_name: payload.last_name || "",
+    street: payload.street || "",
+    city: payload.city || "",
+    zip_code: payload.zip_code || "",
+    password_hash: await hashPassword(payload.password)
+  };
+  localStorage.setItem(LOCAL_ACCOUNT_KEY, JSON.stringify(record));
+  localStorage.setItem(LOCAL_SESSION_KEY, record.email);
+}
+async function storeLocalSession(email) {
+  const account = getLocalAccount();
+  localStorage.setItem(LOCAL_SESSION_KEY, normalizeEmail(email));
+  if (account && account.email === normalizeEmail(email)) return;
+  if (account) return;
+}
+async function cacheLocalAuthFromServer(email, password) {
+  const normalized = normalizeEmail(email);
+  const account = getLocalAccount() || {};
+  try {
+    const res = await fetch(`${API_BASE}/auth/me`, { credentials:"include" });
+    const data = await safeJson(res);
+    const user = data.user || {};
+    localStorage.setItem(LOCAL_ACCOUNT_KEY, JSON.stringify({
+      email: normalized,
+      first_name: user.first_name ?? account.first_name ?? "",
+      last_name: user.last_name ?? account.last_name ?? "",
+      street: user.street ?? account.street ?? "",
+      city: user.city ?? account.city ?? "",
+      zip_code: user.zip_code ?? account.zip_code ?? "",
+      password_hash: await hashPassword(password)
+    }));
+  } catch {
+    localStorage.setItem(LOCAL_ACCOUNT_KEY, JSON.stringify({
+      email: normalized,
+      first_name: account.first_name ?? "",
+      last_name: account.last_name ?? "",
+      street: account.street ?? "",
+      city: account.city ?? "",
+      zip_code: account.zip_code ?? "",
+      password_hash: await hashPassword(password)
+    }));
+  }
+  localStorage.setItem(LOCAL_SESSION_KEY, normalized);
+}
+function getLocalAccount() {
+  try {
+    return JSON.parse(localStorage.getItem(LOCAL_ACCOUNT_KEY) || "null");
+  } catch {
+    return null;
+  }
+}
+async function tryLocalLogin(email, password) {
+  const account = getLocalAccount();
+  if (!account) return { ok:false, error:"Aucun compte local enregistre." };
+  const normalized = normalizeEmail(email);
+  if (account.email !== normalized) {
+    return { ok:false, error:"Compte introuvable sur ce navigateur." };
+  }
+  const hash = await hashPassword(password);
+  if (hash !== account.password_hash) {
+    return { ok:false, error:"E-mail ou mot de passe incorrect." };
+  }
+  localStorage.setItem(LOCAL_SESSION_KEY, normalized);
+  return { ok:true };
+}
+function applyTheme(theme) {
+  document.documentElement.setAttribute("data-theme", theme);
+  const btn = document.getElementById("theme-btn");
+  if (btn) {
+    btn.classList.toggle("light", theme === "light");
+    btn.setAttribute("aria-pressed", theme === "light" ? "true" : "false");
+  }
+}
+async function safeJson(res) {
+  try {
+    return await res.json();
+  } catch {
+    return {};
+  }
+}
+async function postAuthJson(path, payload) {
+  const res = await fetch(`${API_BASE}${path}`, {
+    method:"POST",
+    credentials:"include",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify(payload)
+  });
+  const data = await safeJson(res);
+  return { ok: res.ok, status: res.status, error: data.error || data.message || "" };
+}
+function escapeHtml(value) {
+  return String(value).replace(/[&<>"']/g, char => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"
+  }[char]));
+}
+document.addEventListener("click", event => {
+  const btn = event.target.closest(".btn-submit,.tab-btn,.btn");
+  if (!btn) return;
+  const ripple = document.createElement("span");
+  const rect = btn.getBoundingClientRect();
+  const size = Math.max(rect.width, rect.height);
+  ripple.className = "ripple";
+  ripple.style.width = ripple.style.height = `${size}px`;
+  ripple.style.left = `${event.clientX - rect.left - size / 2}px`;
+  ripple.style.top = `${event.clientY - rect.top - size / 2}px`;
+  btn.appendChild(ripple);
+  ripple.addEventListener("animationend", () => ripple.remove());
+});
+document.addEventListener("keydown", event => {
+  if (event.key !== "Enter") return;
+  const loginActive = document.getElementById("section-login").classList.contains("active");
+  if (loginActive) doLogin(); else doRegister();
+});
+</script>
+</body>
+</html>
