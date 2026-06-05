@@ -1987,7 +1987,7 @@
                         <div class="weather-icon sunny" id="weather-icon"><i class="fas fa-sun"></i></div>
                         <div>
                             <div class="weather-temp"><span id="weather-temp">--</span>°C</div>
-                            <div class="weather-location" id="weather-location">—</div>
+                            <div class="weather-location" id="weather-location">Chargement…</div>
                             <div class="weather-details">
                                 <span id="weather-desc">Chargement…</span>
                                 <span>Humidité: <span id="weather-hum">--</span>% · Vent: <span id="weather-wind">--</span> km/h</span>
@@ -2837,16 +2837,20 @@ async function loadWeather(){
         const icon=document.getElementById("weather-icon");
         icon.className="weather-icon "+wmo.icon;
         icon.innerHTML=`<i class="fas ${wmo.fa}"></i>`;
-        fetch(`https://geocoding-api.open-meteo.com/v1/reverse?latitude=${lat}&longitude=${lon}&language=fr`).then(r=>r.json()).then(g=>{
-            const loc=g.results&&g.results[0];
-            if(loc) document.getElementById("weather-location").textContent=`${loc.name}${loc.country?`, ${loc.country}`:""}`;
-        }).catch(()=>{});
+        loadLocation(lat,lon);
     }catch{
         document.getElementById("weather-temp").textContent="--";
         document.getElementById("weather-hum").textContent="--";
         document.getElementById("weather-wind").textContent="--";
         document.getElementById("weather-desc").textContent="Météo indisponible";
     }
+}
+async function loadLocation(lat,lon){
+    try{
+        const g=await fetch(`https://geocoding-api.open-meteo.com/v1/reverse?latitude=${lat}&longitude=${lon}&language=fr`,{signal:AbortSignal.timeout(5000)}).then(r=>r.json());
+        const loc=g.results&&g.results[0];
+        if(loc) document.getElementById("weather-location").textContent=loc.name+(loc.admin1?`, ${loc.admin1}`:"");
+    }catch{}
 }
 /* ══ Room tabs ══ */
 document.addEventListener("DOMContentLoaded",()=>{
