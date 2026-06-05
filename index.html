@@ -1435,6 +1435,18 @@
             color:#f7f7f2!important;
             -webkit-text-fill-color:currentColor;
         }
+        html[data-theme="dark"] .weather-widget{background:rgba(255,255,255,.06)!important;border-color:rgba(255,255,255,.1)!important}
+        html[data-theme="dark"] .weather-temp,html[data-theme="dark"] .weather-details{color:#f7f7f2!important}
+        html[data-theme="dark"] .notif-btn{background:rgba(255,255,255,.1)!important;border-color:rgba(255,255,255,.15)!important;color:#f7f7f2!important}
+        html[data-theme="dark"] .notif-dropdown{background:rgba(28,28,24,.96)!important;border-color:rgba(255,255,255,.13)!important;color:#f7f7f2!important}
+        html[data-theme="dark"] .notif-header h3,html[data-theme="dark"] .notif-item-title{color:#f7f7f2!important}
+        html[data-theme="dark"] .notif-item-msg{color:rgba(247,247,242,.62)!important}
+        html[data-theme="dark"] .notif-item{border-color:rgba(255,255,255,.08)!important}
+        html[data-theme="dark"] .notif-item:hover{background:rgba(255,255,255,.08)!important}
+        html[data-theme="dark"] .room-tab{background:rgba(255,255,255,.08)!important;border-color:rgba(255,255,255,.12)!important;color:rgba(247,247,242,.7)!important}
+        html[data-theme="dark"] .room-tab.active{background:rgba(241,200,75,.2)!important;border-color:rgba(241,200,75,.4)!important;color:#f4c84d!important}
+        html[data-theme="dark"] .floor-plan-wrap{background:rgba(255,255,255,.04)!important;border-color:rgba(255,255,255,.08)!important}
+        html[data-theme="dark"] .floor-plan-svg text{fill:rgba(247,247,242,.5)!important}
         html[data-theme="dark"] .cons-ico{color:#fff!important}
         html[data-theme="dark"] .s-nav-sec,
         html[data-theme="dark"] .kcard-sub,
@@ -1486,14 +1498,16 @@
         html[data-theme="light"] .topbar-l p{
             color:rgba(36,35,30,.68)!important;
         }
-        html[data-theme="light"] #overview::before{
-            color:#24231e!important;
-            text-shadow:none!important;
-        }
-        html[data-theme="light"] #overview::after{
-            color:rgba(36,35,30,.72)!important;
-            text-shadow:none!important;
-        }
+        html[data-theme="light"] #overview::before{color:#24231e!important;text-shadow:none!important}
+        html[data-theme="light"] #overview::after{color:rgba(36,35,30,.72)!important;text-shadow:none!important}
+        html[data-theme="light"] .weather-widget{background:rgba(255,255,255,.7)!important}
+        html[data-theme="light"] .weather-temp,html[data-theme="light"] .weather-details{color:#24231e!important}
+        html[data-theme="light"] .notif-btn{background:rgba(248,248,242,.86)!important;border-color:rgba(255,255,255,.58)!important;color:#24231e!important}
+        html[data-theme="light"] .room-tab{background:rgba(255,255,255,.5)!important;border-color:rgba(0,0,0,.1)!important;color:#24231e!important}
+        html[data-theme="light"] .room-tab.active{background:rgba(241,200,75,.3)!important;border-color:rgba(241,200,75,.5)!important;color:#7a6a19!important}
+        html[data-theme="light"] .floor-plan-wrap{background:rgba(0,0,0,.03)!important;border-color:rgba(0,0,0,.08)!important}
+        html[data-theme="light"] .floor-plan-svg text{fill:rgba(36,35,30,.5)!important}
+        html[data-theme="light"] .floor-plan-svg rect{stroke:rgba(0,0,0,.15)!important}
         /* Sensor card readability pass */
         #nodes-container{
             grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
@@ -1765,6 +1779,8 @@
         .room-tab:hover{background:rgba(255,255,255,.12);color:#fff}
         .room-tab.active{background:rgba(241,200,75,.2);border-color:rgba(241,200,75,.4);color:#f4c84d}
         .room-tab i{margin-right:5px}
+        .app.hidden{display:none!important}
+        .app.visible{display:grid!important}
     </style>
 </head>
 <body>
@@ -1822,7 +1838,7 @@
 </div>
 
 <!-- ═══════════════ APP ═══════════════ -->
-<div class="app" id="app" style="opacity:0;transition:opacity .6s ease">
+<div class="app hidden" id="app" style="opacity:0;transition:opacity .6s ease">
 
 <aside class="sidebar">
     <div class="s-logo">
@@ -1941,15 +1957,15 @@
 
     <div class="content">
 
+        <div class="room-tabs" id="room-tabs">
+            <button class="room-tab active" data-room="all"><i class="fas fa-th-large"></i> Toutes</button>
+            <button class="room-tab" data-room="kitchen"><i class="fas fa-utensils"></i> Cuisine</button>
+            <button class="room-tab" data-room="salon"><i class="fas fa-couch"></i> Salon</button>
+            <button class="room-tab" data-room="port"><i class="fas fa-door-open"></i> Porte</button>
+            <button class="room-tab" data-room="room"><i class="fas fa-bed"></i> Chambre</button>
+        </div>
         <!-- ═══ OVERVIEW ═══ -->
         <section id="overview" class="sec active">
-            <div class="room-tabs" id="room-tabs">
-                <button class="room-tab active" data-room="all"><i class="fas fa-th-large"></i> Toutes</button>
-                <button class="room-tab" data-room="kitchen"><i class="fas fa-utensils"></i> Cuisine</button>
-                <button class="room-tab" data-room="salon"><i class="fas fa-couch"></i> Salon</button>
-                <button class="room-tab" data-room="port"><i class="fas fa-door-open"></i> Porte</button>
-                <button class="room-tab" data-room="room"><i class="fas fa-bed"></i> Chambre</button>
-            </div>
             <div class="overview-summary" style="display:grid;grid-template-columns:1fr 320px;gap:18px;margin-bottom:18px">
                 <div>
                     <div class="sh" style="margin-bottom:12px"><h2>🏠 Maison — Moyennes</h2></div>
@@ -2780,10 +2796,12 @@ document.addEventListener("click",e=>{
 /* ══ Hero / Notif / SW ══ */
 async function enterDashboard(){
     const hero=document.getElementById("hero-section");
+    const app=document.getElementById("app");
     try{
         const res=await fetch(`${API_BASE}/auth/me`,{credentials:"include",signal:AbortSignal.timeout(4000)});
         if(!res.ok) throw new Error();
-        document.getElementById("app").style.display="flex";
+        app.classList.remove("hidden");
+        app.classList.add("visible");
         hero.classList.add("hidden");
         setTimeout(()=>{hero.style.display="none";location.reload();},800);
     }catch{
@@ -2905,13 +2923,15 @@ document.addEventListener("DOMContentLoaded",async()=>{
     if(!loggedIn){
         document.getElementById("hero-section").classList.remove("hidden");
         document.getElementById("hero-section").style.display="flex";
-        document.getElementById("app").style.display="none";
+        document.getElementById("app").classList.add("hidden");
+        document.getElementById("app").classList.remove("visible");
         document.getElementById("welcome-overlay").style.display="none";
         return;
     }
     document.getElementById("hero-section").classList.add("hidden");
     document.getElementById("hero-section").style.display="none";
-    document.getElementById("app").style.display="flex";
+    document.getElementById("app").classList.remove("hidden");
+    document.getElementById("app").classList.add("visible");
     initAccountMenu();
     initCharts();
     const loggedInFull=await loadUser();
