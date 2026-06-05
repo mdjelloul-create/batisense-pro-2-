@@ -2021,7 +2021,7 @@
                                 <span class="weather-temp"><span id="weather-temp">--</span></span>
                                 <span class="weather-unit">°C</span>
                             </div>
-                            <div class="weather-location"><span id="weather-location">Chargement…</span> <i class="fas fa-pen" style="font-size:8px;opacity:.35;margin-left:3px;vertical-align:middle"></i></div>
+                            <div class="weather-location"><span id="weather-location">Chargement…</span> <span id="weather-loc-actions"><i class="fas fa-sync-alt" id="weather-redetect" title="Détection auto" style="font-size:9px;opacity:.4;margin-left:4px;cursor:pointer"></i><i class="fas fa-pen" id="weather-edit" title="Changer de ville" style="font-size:8px;opacity:.35;margin-left:4px;cursor:pointer"></i></span></div>
                             <div class="weather-details">
                                 <span class="weather-detail-item"><i class="fas fa-water"></i> <span id="weather-hum">--</span>%</span>
                                 <span class="weather-detail-item"><i class="fas fa-wind"></i> <span id="weather-wind">--</span> km/h</span>
@@ -2849,28 +2849,41 @@ const WMO_CODES = {
     96:{icon:"rainy",label:"Orage avec grêle",fa:"fa-bolt"},
     99:{icon:"rainy",label:"Orage violent",fa:"fa-bolt"}
 };
-async function loadWeather(){
+async function loadWeather(savedLoc){
     try{
-        let lat=48.8566, lon=2.3522, locText="";
-        const saved=localStorage.getItem("bs_weather_city");
-        if(saved){
-            const p=saved.split("|");
+        let lat, lon, locText;
+        if(savedLoc){
+            const p=savedLoc.split("|");
             if(p.length>=3){lat=+p[0];lon=+p[1];locText=p[2];}
+        }else{
+            const s=localStorage.getItem("bs_weather_city");
+            if(s){const p=s.split("|");if(p.length>=3){lat=+p[0];lon=+p[1];locText=p[2];}}
         }
-        if(!locText){
+        if(!lat){
             try{
-                const g=await fetch("http://ip-api.com/json/",{signal:AbortSignal.timeout(4000)}).then(r=>r.json());
-                if(g&&g.lat!=null){lat=g.lat;lon=g.lon;}
-                if(g&&g.city) locText=g.city+(g.regionName?`, ${g.regionName}`:"");
-            }catch{}
-            if(!locText||!lat){
+                const pos=await new Promise((res,rej)=>navigator.geolocation.getCurrentPosition(res,rej,{timeout:8000,enableHighAccuracy:true}));
+                lat=pos.coords.latitude;lon=pos.coords.longitude;
                 try{
-                    const g=await fetch("https://ipapi.co/json/",{signal:AbortSignal.timeout(3000)}).then(r=>r.json()).catch(()=>null);
-                    if(g&&g.latitude){lat=g.latitude;lon=g.longitude;}
-                    if(g&&g.city) locText=g.city+(g.region?`, ${g.region}`:"");
+                    const g=await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&accept-language=fr`,{headers:{"User-Agent":"BatiSensePro/1.0"}}).then(r=>r.json());
+                    if(g&&g.address){const a=g.address;locText=[a.city||a.town||a.village||a.county,a.state,a.country].filter(Boolean).join(", ");}
                 }catch{}
+                if(locText) localStorage.setItem("bs_weather_city",`${lat}|${lon}|${locText}`);
+            }catch{
+                try{
+                    const g=await fetch("https://ipinfo.io/json",{signal:AbortSignal.timeout(4000)}).then(r=>r.json());
+                    if(g&&g.loc){const p=g.loc.split(",");lat=+p[0];lon=+p[1];}
+                    if(g&&g.city) locText=g.city+(g.region?`, ${g.region}`:"");
+                }catch{
+                    try{
+                        const g=await fetch("http://ip-api.com/json/",{signal:AbortSignal.timeout(3000)}).then(r=>r.json());
+                        if(g&&g.lat!=null){lat=g.lat;lon=g.lon;}
+                        if(g&&g.city) locText=g.city+(g.regionName?`, ${g.regionName}`:"");
+                    }catch{}
+                }
+                if(lat) localStorage.setItem("bs_weather_city",`${lat}|${lon}|${locText||""}`);
             }
         }
+        if(!lat){lat=48.8566;lon=2.3522;locText="Paris, Île-de-France";}
         const w=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m&timezone=auto`,{signal:AbortSignal.timeout(6000)}).then(r=>r.json());
         const c=w.current;
         const temp=Math.round(c.temperature_2m), hum=c.relative_humidity_2m, wind=c.wind_speed_10m, code=c.weather_code;
@@ -2905,16 +2918,16 @@ async function setWeatherCity(name){
         }else alert("Ville non trouvée");
     }catch{alert("Erreur de recherche");}
 }
+async function redetectLocation(){
+    localStorage.removeItem("bs_weather_city");
+    document.getElementById("weather-location").textContent="Détection…";
+    loadWeather();
+}
 document.addEventListener("DOMContentLoaded",()=>{
-    const locEl=document.getElementById("weather-location");
-    if(locEl){
-        locEl.style.cursor="pointer";
-        locEl.title="Cliquez pour changer de ville";
-        locEl.addEventListener("click",()=>{
-            const input=prompt("Entrez le nom de votre ville (ex: Paris):");
-            if(input&&input.trim()) setWeatherCity(input.trim());
-        });
-    }
+    const editBtn=document.getElementById("weather-edit");
+    if(editBtn) editBtn.addEventListener("click",(e)=>{e.stopPropagation();const input=prompt("Entrez le nom de votre ville (ex: Paris):");if(input&&input.trim()) setWeatherCity(input.trim());});
+    const redetectBtn=document.getElementById("weather-redetect");
+    if(redetectBtn) redetectBtn.addEventListener("click",(e)=>{e.stopPropagation();redetectLocation();});
 });
 /* ══ Room tabs ══ */
 document.addEventListener("DOMContentLoaded",()=>{
