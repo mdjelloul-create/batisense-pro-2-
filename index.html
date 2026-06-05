@@ -1436,7 +1436,7 @@
             -webkit-text-fill-color:currentColor;
         }
         html[data-theme="dark"] .weather-widget{background:rgba(255,255,255,.06)!important;border-color:rgba(255,255,255,.1)!important}
-        html[data-theme="dark"] .weather-temp,html[data-theme="dark"] .weather-details{color:#f7f7f2!important}
+        html[data-theme="dark"] .weather-temp,html[data-theme="dark"] .weather-details,html[data-theme="dark"] .weather-location{color:#f7f7f2!important}
         html[data-theme="dark"] .notif-btn{background:rgba(255,255,255,.1)!important;border-color:rgba(255,255,255,.15)!important;color:#f7f7f2!important}
         html[data-theme="dark"] .notif-dropdown{background:rgba(28,28,24,.96)!important;border-color:rgba(255,255,255,.13)!important;color:#f7f7f2!important}
         html[data-theme="dark"] .notif-header h3,html[data-theme="dark"] .notif-item-title{color:#f7f7f2!important}
@@ -1499,7 +1499,7 @@
         html[data-theme="light"] #overview::before{color:#24231e!important;text-shadow:none!important}
         html[data-theme="light"] #overview::after{color:rgba(36,35,30,.72)!important;text-shadow:none!important}
         html[data-theme="light"] .weather-widget{background:rgba(255,255,255,.7)!important}
-        html[data-theme="light"] .weather-temp,html[data-theme="light"] .weather-details{color:#24231e!important}
+        html[data-theme="light"] .weather-temp,html[data-theme="light"] .weather-details,html[data-theme="light"] .weather-location{color:#24231e!important}
         html[data-theme="light"] .notif-btn{background:rgba(248,248,242,.86)!important;border-color:rgba(255,255,255,.58)!important;color:#24231e!important}
         html[data-theme="light"] .room-tab{background:rgba(255,255,255,.5)!important;border-color:rgba(0,0,0,.1)!important;color:#24231e!important}
         html[data-theme="light"] .room-tab.active{background:rgba(241,200,75,.3)!important;border-color:rgba(241,200,75,.5)!important;color:#7a6a19!important}
@@ -1689,6 +1689,7 @@
         .weather-icon{font-size:32px;width:48px;text-align:center}
         .weather-icon.sunny{color:#f4c84d}.weather-icon.cloudy{color:#8ea8d8}.weather-icon.rainy{color:#74bfc2}
         .weather-temp{font-family:Inter,sans-serif;font-size:28px;font-weight:900;line-height:1}
+        .weather-location{font-size:11px;color:rgba(255,255,255,.55);margin-top:2px}
         .weather-details{font-size:11px;color:rgba(255,255,255,.65);line-height:1.5}
         .weather-details span{display:block}
 
@@ -1986,6 +1987,7 @@
                         <div class="weather-icon sunny" id="weather-icon"><i class="fas fa-sun"></i></div>
                         <div>
                             <div class="weather-temp"><span id="weather-temp">--</span>°C</div>
+                            <div class="weather-location" id="weather-location">—</div>
                             <div class="weather-details">
                                 <span id="weather-desc">Chargement…</span>
                                 <span>Humidité: <span id="weather-hum">--</span>% · Vent: <span id="weather-wind">--</span> km/h</span>
@@ -2835,6 +2837,10 @@ async function loadWeather(){
         const icon=document.getElementById("weather-icon");
         icon.className="weather-icon "+wmo.icon;
         icon.innerHTML=`<i class="fas ${wmo.fa}"></i>`;
+        fetch(`https://geocoding-api.open-meteo.com/v1/reverse?latitude=${lat}&longitude=${lon}&language=fr`).then(r=>r.json()).then(g=>{
+            const loc=g.results&&g.results[0];
+            if(loc) document.getElementById("weather-location").textContent=`${loc.name}${loc.country?`, ${loc.country}`:""}`;
+        }).catch(()=>{});
     }catch{
         document.getElementById("weather-temp").textContent="--";
         document.getElementById("weather-hum").textContent="--";
