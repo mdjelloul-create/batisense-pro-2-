@@ -1,0 +1,27 @@
+{
+  "name": "BatiSense Pro",
+  "short_name": "BatiSense",
+  "description": "Smart Building Intelligence – Surveillez température, humidité, consommation et sécurité en temps réel.",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#040711",
+  "theme_color": "#00f5a0",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "batisense-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "batisense-logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["smart-home", "iot", "utilities"],
+  "lang": "fr",
+  "scope": "/"
+}

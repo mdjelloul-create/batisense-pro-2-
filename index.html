@@ -3,7 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BatiSense Pro — Dashboard</title>
+    <meta name="description" content="BatiSense Pro — Smart Building Intelligence. Surveillez température, humidité, consommation d'énergie et sécurité en temps réel.">
+    <meta name="theme-color" content="#2f2a18">
+    <title>BatiSense Pro — Smart Building Intelligence</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="batisense-icon.svg">
 
     <!-- ═══════════════ FAVICON (SVG dans la barre d'onglet) ═══════════════ -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,
@@ -1597,6 +1601,170 @@
                 overflow-y:hidden;
             }
         }
+
+        /* ═══════════════ HERO SECTION ═══════════════ */
+        .hero-section{
+            position:fixed;inset:0;z-index:2000;
+            display:none;flex-direction:column;align-items:center;justify-content:center;
+            background:linear-gradient(135deg,#0b0b09 0%,#1a1a14 40%,#2f2a18 70%,#1a1a14 100%);
+            transition:opacity .8s ease,transform .8s ease;
+            overflow:hidden;
+        }
+        .hero-section.hidden{
+            opacity:0;transform:scale(1.05);pointer-events:none;
+        }
+        .hero-section::before{
+            content:'';position:absolute;inset:0;
+            background:radial-gradient(circle at 30% 20%,rgba(241,200,75,.12),transparent 40%),
+                        radial-gradient(circle at 80% 80%,rgba(127,195,110,.08),transparent 40%);
+            pointer-events:none;
+        }
+        .hero-pattern{
+            position:absolute;inset:0;pointer-events:none;opacity:.06;
+            background-image:linear-gradient(135deg,rgba(255,255,255,.13) 1px,transparent 1px);
+            background-size:40px 40px;
+        }
+        .hero-content{position:relative;z-index:1;text-align:center;max-width:680px;padding:20px}
+        .hero-badge{
+            display:inline-flex;align-items:center;gap:8px;
+            padding:8px 18px;border-radius:999px;
+            background:rgba(241,200,75,.15);border:1px solid rgba(241,200,75,.3);
+            color:#f4c84d;font-size:12px;font-weight:800;letter-spacing:.05em;
+            margin-bottom:28px;font-family:Inter,sans-serif;
+        }
+        .hero-title{
+            font-family:Inter,sans-serif;font-size:clamp(36px,6vw,64px);font-weight:900;
+            letter-spacing:-.04em;line-height:1.05;color:#fff;margin-bottom:18px;
+        }
+        .hero-title span{background:linear-gradient(135deg,#f4c84d,#8ecf7b,#74bfc2);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+        .hero-sub{
+            font-size:clamp(15px,2vw,19px);color:rgba(255,255,255,.7);line-height:1.6;
+            margin-bottom:36px;max-width:520px;margin-left:auto;margin-right:auto;
+            font-family:Inter,sans-serif;font-weight:400;
+        }
+        .hero-actions{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+        .hero-btn{
+            display:inline-flex;align-items:center;gap:10px;
+            padding:14px 32px;border-radius:999px;border:none;
+            font-size:15px;font-weight:800;font-family:Inter,sans-serif;
+            cursor:pointer;transition:all .3s cubic-bezier(.34,1.56,.64,1);
+            text-decoration:none;
+        }
+        .hero-btn.primary{
+            background:linear-gradient(135deg,#f4c84d,#e0b53a);color:#1a1a14;
+            box-shadow:0 8px 30px rgba(241,200,75,.3);
+        }
+        .hero-btn.primary:hover{transform:translateY(-3px);box-shadow:0 14px 40px rgba(241,200,75,.45)}
+        .hero-btn.secondary{
+            background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.2);
+        }
+        .hero-btn.secondary:hover{background:rgba(255,255,255,.18);transform:translateY(-3px)}
+        .hero-stats{
+            display:flex;gap:40px;justify-content:center;margin-top:48px;
+        }
+        .hero-stat{text-align:center}
+        .hero-stat-num{font-family:Inter,sans-serif;font-size:28px;font-weight:900;color:#f4c84d}
+        .hero-stat-lbl{font-size:12px;color:rgba(255,255,255,.55);margin-top:4px;font-weight:500}
+        .hero-footer{
+            position:absolute;bottom:24px;left:0;right:0;text-align:center;
+            font-size:11px;color:rgba(255,255,255,.3);font-family:Inter,sans-serif;
+        }
+
+        /* ═══════════════ WEATHER WIDGET ═══════════════ */
+        .weather-widget{
+            display:flex;align-items:center;gap:14px;padding:14px 18px;
+            background:linear-gradient(135deg,rgba(116,191,194,.12),rgba(142,207,123,.08));
+            border-radius:16px;border:1px solid rgba(255,255,255,.12);
+            backdrop-filter:blur(12px);
+        }
+        .weather-icon{font-size:32px;width:48px;text-align:center}
+        .weather-icon.sunny{color:#f4c84d}.weather-icon.cloudy{color:#8ea8d8}.weather-icon.rainy{color:#74bfc2}
+        .weather-temp{font-family:Inter,sans-serif;font-size:28px;font-weight:900;line-height:1}
+        .weather-details{font-size:11px;color:rgba(255,255,255,.65);line-height:1.5}
+        .weather-details span{display:block}
+
+        /* ═══════════════ NOTIFICATION BELL ═══════════════ */
+        .notif-btn{
+            position:relative;width:40px;height:40px;border-radius:50%;
+            display:grid;place-items:center;border:1px solid var(--b1);
+            background:var(--card-bg);color:var(--t0);font-size:16px;
+            cursor:pointer;transition:all .25s;
+        }
+        .notif-btn:hover{background:var(--bg3);border-color:rgba(0,245,160,.35);color:var(--green)}
+        .notif-btn .notif-badge{
+            position:absolute;top:-4px;right:-4px;
+            min-width:18px;height:18px;padding:0 5px;
+            border-radius:999px;background:var(--red);color:#fff;
+            font-size:10px;font-weight:800;line-height:18px;text-align:center;
+            display:none;box-shadow:0 4px 10px rgba(229,80,69,.35);
+        }
+        .notif-dropdown{
+            position:absolute;top:calc(100% + 10px);right:0;
+            width:360px;max-height:420px;overflow-y:auto;
+            z-index:80;display:none;padding:12px;
+            border-radius:18px;color:#24231e;
+            background:rgba(248,248,243,.96);
+            border:1px solid rgba(255,255,255,.72);
+            box-shadow:0 24px 70px rgba(0,0,0,.28);
+            backdrop-filter:blur(20px) saturate(140%);
+        }
+        .notif-dropdown.open{display:block;animation:notifIn .2s ease}
+        @keyframes notifIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
+        .notif-header{display:flex;justify-content:space-between;align-items:center;padding:0 4px 10px;border-bottom:1px solid rgba(0,0,0,.08);margin-bottom:8px}
+        .notif-header h3{font-size:13px;font-weight:900;font-family:Inter,sans-serif;color:#24231e}
+        .notif-header .notif-clear{font-size:11px;color:#77766d;cursor:pointer;font-weight:700;border:none;background:none}
+        .notif-header .notif-clear:hover{color:#24231e}
+        .notif-item{
+            display:flex;gap:10px;padding:10px 8px;border-radius:12px;
+            border-bottom:1px solid rgba(0,0,0,.05);cursor:pointer;transition:background .15s;
+            align-items:flex-start;
+        }
+        .notif-item:hover{background:rgba(0,0,0,.04)}
+        .notif-item-icon{font-size:14px;margin-top:2px;flex-shrink:0;width:20px;text-align:center}
+        .notif-item-icon.danger{color:#c94f43}.notif-item-icon.warning{color:#d49a20}.notif-item-icon.info{color:#5a7fbf}
+        .notif-item-body{flex:1;min-width:0}
+        .notif-item-title{font-size:12px;font-weight:800;color:#24231e}
+        .notif-item-msg{font-size:11px;color:#69685f;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .notif-item-ts{font-size:10px;color:#9a9a8f;margin-top:3px}
+        .notif-empty{padding:24px;text-align:center;color:#9a9a8f;font-size:13px}
+        .notif-empty i{font-size:28px;display:block;margin-bottom:8px;opacity:.5}
+
+        /* ═══════════════ SKELETON LOADERS ═══════════════ */
+        .skeleton{background:linear-gradient(90deg,rgba(255,255,255,.06) 25%,rgba(255,255,255,.15) 50%,rgba(255,255,255,.06) 75%);background-size:200% 100%;animation:skeletonPulse 1.6s ease-in-out infinite;border-radius:8px}
+        @keyframes skeletonPulse{0%{background-position:200% 0}100%{background-position:-200% 0}}
+        .skeleton-card{min-height:130px;padding:18px}
+        .skeleton-card .skeleton-line{height:12px;margin-bottom:10px;width:60%}
+        .skeleton-card .skeleton-line.short{width:35%}
+        .skeleton-card .skeleton-line.long{width:80%}
+        .skeleton-card .skeleton-block{height:40px;width:40px;border-radius:50%;margin-bottom:12px}
+        .skeleton-kpi{min-height:146px;border-radius:24px;background:rgba(248,248,242,.86);border:1px solid var(--card-border);padding:17px;display:flex;flex-direction:column}
+        .skeleton-kpi .sk-hdr{display:flex;justify-content:space-between;margin-bottom:20px}
+        .skeleton-kpi .sk-lbl{height:11px;width:60px;border-radius:6px}
+        .skeleton-kpi .sk-ico{height:34px;width:34px;border-radius:50%}
+        .skeleton-kpi .sk-val{height:30px;width:80px;border-radius:8px;margin-bottom:8px}
+        .skeleton-kpi .sk-sub{height:11px;width:120px;border-radius:6px}
+        .skeleton-node{border-radius:20px;padding:16px;background:rgba(248,248,242,.86);border:1px solid var(--card-border)}
+        .skeleton-node .sk-head{display:flex;justify-content:space-between;margin-bottom:14px}
+        .skeleton-node .sk-name{height:14px;width:100px;border-radius:6px}
+        .skeleton-node .sk-pill{height:22px;width:60px;border-radius:999px}
+        .skeleton-node .sk-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+        .skeleton-node .sk-sensor{height:48px;border-radius:12px}
+
+        /* ═══════════════ FLOOR PLAN ═══════════════ */
+        .floor-plan-wrap{position:relative;width:100%;border-radius:16px;overflow:hidden;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);aspect-ratio:4/3}
+        .floor-plan-svg{width:100%;height:100%;display:block}
+        .floor-room{transition:all .3s;cursor:pointer}
+        .floor-room:hover{opacity:.8}
+        .floor-room.active{filter:drop-shadow(0 0 10px rgba(241,200,75,.5))}
+        .room-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+        .room-tab{
+            padding:7px 16px;border-radius:999px;border:1px solid rgba(255,255,255,.15);
+            background:rgba(255,255,255,.06);color:rgba(255,255,255,.7);font-size:12px;font-weight:700;
+            cursor:pointer;transition:all .2s;font-family:Inter,sans-serif;
+        }
+        .room-tab:hover{background:rgba(255,255,255,.12);color:#fff}
+        .room-tab.active{background:rgba(241,200,75,.2);border-color:rgba(241,200,75,.4);color:#f4c84d}
+        .room-tab i{margin-right:5px}
     </style>
 </head>
 <body>
@@ -1630,6 +1798,27 @@
         <div class="wov-bar"><div class="wov-bar-fill"></div></div>
         <div class="wov-hint">CHARGEMENT DU TABLEAU DE BORD</div>
     </div>
+</div>
+
+<!-- ═══════════════ HERO LANDING ═══════════════ -->
+<div class="hero-section" id="hero-section">
+    <div class="hero-pattern"></div>
+    <div class="hero-content">
+        <div class="hero-badge"><i class="fas fa-house-signal"></i> IoT Intelligent · Temps Réel</div>
+        <h1 class="hero-title">Smart Home,<br><span>Smarter Control</span><br>avec BatiSense Pro</h1>
+        <p class="hero-sub">Surveillez température, humidité, consommation d'énergie et sécurité de votre bâtiment en temps réel depuis un tableau de bord moderne et intuitif.</p>
+        <div class="hero-actions">
+            <button class="hero-btn primary" onclick="enterDashboard()"><i class="fas fa-rocket"></i> Accéder au Dashboard</button>
+            <a class="hero-btn secondary" href="auth.html"><i class="fas fa-user-plus"></i> Créer un compte</a>
+        </div>
+        <div class="hero-stats">
+            <div class="hero-stat"><div class="hero-stat-num">24/7</div><div class="hero-stat-lbl">Surveillance</div></div>
+            <div class="hero-stat"><div class="hero-stat-num">8</div><div class="hero-stat-lbl">Capteurs</div></div>
+            <div class="hero-stat"><div class="hero-stat-num">3</div><div class="hero-stat-lbl">Pièces</div></div>
+            <div class="hero-stat"><div class="hero-stat-num">∞</div><div class="hero-stat-lbl">Automatisations</div></div>
+        </div>
+    </div>
+    <div class="hero-footer">BatiSense Pro v2.0 — Smart Building Intelligence</div>
 </div>
 
 <!-- ═══════════════ APP ═══════════════ -->
@@ -1688,6 +1877,17 @@
             </p>
         </div>
         <div class="topbar-r">
+            <div class="notif-btn" id="notif-btn" onclick="toggleNotifPanel()" title="Notifications">
+                <i class="fas fa-bell"></i>
+                <span class="notif-badge" id="notif-bell-badge">0</span>
+            </div>
+            <div class="notif-dropdown" id="notif-dropdown">
+                <div class="notif-header">
+                    <h3><i class="fas fa-bell" style="margin-right:6px;color:#c94f43"></i>Notifications</h3>
+                    <button class="notif-clear" onclick="clearAllNotifs()">Tout effacer</button>
+                </div>
+                <div id="notif-list"></div>
+            </div>
             <button class="btn" onclick="exportCSV()"><i class="fas fa-file-csv"></i> CSV</button>
             <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()" type="button" aria-label="Changer le theme" aria-pressed="false">
                 <span class="theme-track">
@@ -1743,6 +1943,13 @@
 
         <!-- ═══ OVERVIEW ═══ -->
         <section id="overview" class="sec active">
+            <div class="room-tabs" id="room-tabs">
+                <button class="room-tab active" data-room="all"><i class="fas fa-th-large"></i> Toutes</button>
+                <button class="room-tab" data-room="kitchen"><i class="fas fa-utensils"></i> Cuisine</button>
+                <button class="room-tab" data-room="salon"><i class="fas fa-couch"></i> Salon</button>
+                <button class="room-tab" data-room="port"><i class="fas fa-door-open"></i> Porte</button>
+                <button class="room-tab" data-room="room"><i class="fas fa-bed"></i> Chambre</button>
+            </div>
             <div class="overview-summary" style="display:grid;grid-template-columns:1fr 320px;gap:18px;margin-bottom:18px">
                 <div>
                     <div class="sh" style="margin-bottom:12px"><h2>🏠 Maison — Moyennes</h2></div>
@@ -1769,7 +1976,18 @@
                         </div>
                     </div>
                 </div>
-                <div class="panel" style="margin-bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:170px;position:relative;">
+                <div style="display:flex;flex-direction:column;gap:12px">
+                    <div class="weather-widget" id="weather-widget">
+                        <div class="weather-icon sunny" id="weather-icon"><i class="fas fa-sun"></i></div>
+                        <div>
+                            <div class="weather-temp"><span id="weather-temp">--</span>°C</div>
+                            <div class="weather-details">
+                                <span id="weather-desc">Chargement…</span>
+                                <span>Humidité: <span id="weather-hum">--</span>% · Vent: <span id="weather-wind">--</span> km/h</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel" style="margin-bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:150px;position:relative;">
                     <div class="pt" style="margin-bottom:0;font-size:10px;color:var(--t2);position:absolute;top:12px;left:16px;"><i class="fas fa-cube"></i> Modèle 3D interactif</div>
                     <div class="house-widget" style="position:relative;">
                         <div class="house-core-glow"></div>
@@ -1803,6 +2021,7 @@
                         </div>
                     </div>
                     <div style="font-size:9px;font-family:var(--fmono);color:var(--t2);letter-spacing:1.5px;margin-top:6px">GLISSEZ POUR TOURNER 🖱️</div>
+                </div>
                 </div>
             </div>
 
@@ -1865,6 +2084,43 @@
                 <div class="panel">
                     <div class="ph"><div class="pt"><i class="fas fa-walking"></i> Présence – 24h (Cuisine)</div></div>
                     <div class="cbox h180"><canvas id="chartPresence"></canvas></div>
+                </div>
+            </div>
+            <div class="panel" style="margin-top:12px">
+                <div class="ph"><div class="pt"><i class="fas fa-draw-polygon"></i> Plan du bâtiment</div></div>
+                <div class="g2" style="gap:16px">
+                    <div class="floor-plan-wrap">
+                        <svg class="floor-plan-svg" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="2" y="2" width="396" height="296" rx="8" fill="none" stroke="rgba(255,255,255,.1)" stroke-width="1.5"/>
+                            <rect x="10" y="10" width="180" height="130" rx="6" fill="rgba(0,245,160,.06)" stroke="rgba(0,245,160,.25)" stroke-width="1.5" class="floor-room" id="fp-kitchen"/>
+                            <text x="100" y="80" text-anchor="middle" fill="rgba(255,255,255,.5)" font-size="11" font-family="Inter,sans-serif" font-weight="700">🍳 Cuisine</text>
+                            <text x="100" y="100" text-anchor="middle" fill="rgba(255,255,255,.3)" font-size="9" font-family="Inter,sans-serif" id="fp-kitchen-temp">--°C</text>
+                            <rect x="200" y="10" width="190" height="130" rx="6" fill="rgba(0,212,224,.06)" stroke="rgba(0,212,224,.25)" stroke-width="1.5" class="floor-room" id="fp-salon"/>
+                            <text x="295" y="80" text-anchor="middle" fill="rgba(255,255,255,.5)" font-size="11" font-family="Inter,sans-serif" font-weight="700">🛋️ Salon</text>
+                            <text x="295" y="100" text-anchor="middle" fill="rgba(255,255,255,.3)" font-size="9" font-family="Inter,sans-serif" id="fp-salon-temp">--°C</text>
+                            <rect x="10" y="150" width="130" height="100" rx="6" fill="rgba(241,200,75,.06)" stroke="rgba(241,200,75,.25)" stroke-width="1.5" class="floor-room" id="fp-port"/>
+                            <text x="75" y="205" text-anchor="middle" fill="rgba(255,255,255,.5)" font-size="11" font-family="Inter,sans-serif" font-weight="700">🚪 Porte</text>
+                            <text x="75" y="220" text-anchor="middle" fill="rgba(255,255,255,.3)" font-size="9" font-family="Inter,sans-serif" id="fp-port-status">--</text>
+                            <rect x="150" y="150" width="130" height="100" rx="6" fill="rgba(77,141,255,.06)" stroke="rgba(77,141,255,.25)" stroke-width="1.5" class="floor-room" id="fp-room"/>
+                            <text x="215" y="205" text-anchor="middle" fill="rgba(255,255,255,.5)" font-size="11" font-family="Inter,sans-serif" font-weight="700">🛏️ Chambre</text>
+                            <text x="215" y="220" text-anchor="middle" fill="rgba(255,255,255,.3)" font-size="9" font-family="Inter,sans-serif" id="fp-room-status">--</text>
+                            <rect x="290" y="150" width="100" height="100" rx="6" fill="rgba(160,107,255,.06)" stroke="rgba(160,107,255,.25)" stroke-width="1.5"/>
+                            <text x="340" y="205" text-anchor="middle" fill="rgba(255,255,255,.4)" font-size="11" font-family="Inter,sans-serif" font-weight="700">⚡ Technique</text>
+                            <text x="340" y="260" text-anchor="middle" fill="rgba(255,255,255,.2)" font-size="9" font-family="Inter,sans-serif">Tableau électrique</text>
+                            <rect x="10" y="260" width="380" height="30" rx="4" fill="rgba(255,255,255,.03)" stroke="rgba(255,255,255,.08)" stroke-width="1"/>
+                            <text x="200" y="280" text-anchor="middle" fill="rgba(255,255,255,.3)" font-size="9" font-family="Inter,sans-serif">Couloir · Détecteurs de fumée · Accès réseau</text>
+                        </svg>
+                    </div>
+                    <div class="panel" style="margin-bottom:0;display:flex;flex-direction:column;justify-content:center;min-height:auto">
+                        <div class="pt" style="margin-bottom:10px"><i class="fas fa-info-circle"></i> Légende</div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:11px;color:rgba(255,255,255,.7)">
+                            <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:rgba(0,245,160,.25);margin-right:6px;vertical-align:middle"></span>Cuisine</span>
+                            <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:rgba(0,212,224,.25);margin-right:6px;vertical-align:middle"></span>Salon</span>
+                            <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:rgba(241,200,75,.25);margin-right:6px;vertical-align:middle"></span>Porte</span>
+                            <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:rgba(77,141,255,.25);margin-right:6px;vertical-align:middle"></span>Chambre</span>
+                        </div>
+                        <div id="fp-timestamps" style="margin-top:14px;font-size:10px;color:rgba(255,255,255,.4);border-top:1px solid rgba(255,255,255,.06);padding-top:10px"></div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -2261,7 +2517,7 @@ function onSensorEvent(d) {
     }
     if(!state.latest[nid]) state.latest[nid]={};
     state.latest[nid][sensor_type]=value; state.nodeSeen[nid]=timestamp;
-    flashLiveDot(nid,timestamp); updateCardForNode(nid,sensor_type,value); updateNodeCard(nid);
+    flashLiveDot(nid,timestamp); updateCardForNode(nid,sensor_type,value); updateNodeCard(nid); updateFloorPlan(nid,sensor_type,value);
     const pt={x:new Date(timestamp).getTime(),y:value};
     if(nid==="kitchen"&&sensor_type==="temperature"&&(_tempFilter==="all"||_tempFilter==="kitchen")) appendChartPoint("temp","Cuisine","var(--green)",pt);
     if(nid==="salon"&&sensor_type==="temperature"&&(_tempFilter==="all"||_tempFilter==="salon")) appendChartPoint("temp","Salon","var(--teal)",pt);
@@ -2301,6 +2557,16 @@ function renderAverages() {
     if(hd.length) setText("avg-hum-detail",hd.join(" · "));
     if(a.avg_temperature!==null) flashEl("avg-temp-card");
     if(a.avg_humidity!==null) flashEl("avg-hum-card");
+}
+function updateFloorPlan(nid,sensor,value){
+    if(nid==="kitchen"&&sensor==="temperature") setText("fp-kitchen-temp",`${value.toFixed(1)}°C`);
+    if(nid==="salon"&&sensor==="temperature") setText("fp-salon-temp",`${value.toFixed(1)}°C`);
+    if(nid==="port"&&sensor==="door_open") setText("fp-port-status",value===1?"🚪 Ouverte":"🚪 Fermée");
+    if(nid==="room"&&sensor==="presence") setText("fp-room-status",value===1?"👤 Présent":"👤 Absent");
+    const ts=[];
+    if(state.nodeSeen.kitchen) ts.push(`Cuisine: ${new Date(state.nodeSeen.kitchen).toLocaleTimeString("fr-FR")}`);
+    if(state.nodeSeen.salon) ts.push(`Salon: ${new Date(state.nodeSeen.salon).toLocaleTimeString("fr-FR")}`);
+    if(ts.length) setText("fp-timestamps","Dernière mise à jour: "+ts.join(" · "));
 }
 function updateCardForNode(nid,sensor,value) {
     if(nid==="kitchen"){
@@ -2511,6 +2777,100 @@ document.addEventListener("click",e=>{
     ripple.addEventListener("animationend",()=>ripple.remove());
 });
 
+/* ══ Hero / Notif / SW ══ */
+async function enterDashboard(){
+    const hero=document.getElementById("hero-section");
+    try{
+        const res=await fetch(`${API_BASE}/auth/me`,{credentials:"include",signal:AbortSignal.timeout(4000)});
+        if(!res.ok) throw new Error();
+        document.getElementById("app").style.display="flex";
+        hero.classList.add("hidden");
+        setTimeout(()=>{hero.style.display="none";location.reload();},800);
+    }catch{
+        window.location.href=LOGIN_URL;
+    }
+}
+function toggleNotifPanel(){
+    const p=document.getElementById("notif-dropdown");
+    p.classList.toggle("open");
+}
+document.addEventListener("click",e=>{
+    const btn=document.getElementById("notif-btn");
+    const dd=document.getElementById("notif-dropdown");
+    if(!btn.contains(e.target)&&!dd.contains(e.target)) dd.classList.remove("open");
+});
+function clearAllNotifs(){
+    const list=document.getElementById("notif-list");
+    list.innerHTML=`<div class="notif-empty"><i class="fas fa-check-circle"></i>Aucune notification</div>`;
+    document.getElementById("notif-bell-badge").style.display="none";
+    state.alertCount=0;
+    updateAlertBadge();
+}
+function pushNotif(level,nodeId,msg,ts){
+    const list=document.getElementById("notif-list");
+    const empty=list.querySelector(".notif-empty"); if(empty) empty.remove();
+    const iconMap={danger:["fa-exclamation-circle","danger"],warning:["fa-exclamation-triangle","warning"],info:["fa-info-circle","info"]};
+    const [icon,cls]=iconMap[level]||["fa-info-circle","info"];
+    const el=document.createElement("div");
+    el.className="notif-item";
+    el.innerHTML=`<i class="fas ${icon} notif-item-icon ${cls}"></i><div class="notif-item-body"><div class="notif-item-title">${escapeHtml(nodeId)}</div><div class="notif-item-msg">${escapeHtml(msg)}</div><div class="notif-item-ts">${ts}</div></div>`;
+    list.prepend(el);
+    const badge=document.getElementById("notif-bell-badge");
+    const cnt=parseInt(badge.textContent)||0;
+    badge.textContent=cnt+1;
+    badge.style.display="inline";
+    if(list.children.length>5) list.lastElementChild.remove();
+}
+/* Patch onAlertEvent to also push to notif bell */
+const _origOnAlert=onAlertEvent;
+onAlertEvent=function(d){
+    _origOnAlert(d);
+    pushNotif(d.level,d.node_id,d.message,d.timestamp);
+};
+/* ══ Weather ══ */
+async function loadWeather(){
+    try{
+        const w=await fetch("https://wttr.in/?format=j1",{signal:AbortSignal.timeout(5000)}).then(r=>r.json());
+        const cc=w.current_condition[0];
+        const temp=cc.temp_C, hum=cc.humidity, wind=cc.windspeedKmph, desc=cc.weatherDesc[0].value;
+        document.getElementById("weather-temp").textContent=temp;
+        document.getElementById("weather-hum").textContent=hum;
+        document.getElementById("weather-wind").textContent=wind;
+        document.getElementById("weather-desc").textContent=desc;
+        const icon=document.getElementById("weather-icon");
+        if(desc.toLowerCase().includes("sun")||desc.toLowerCase().includes("clear")){icon.className="weather-icon sunny";icon.innerHTML='<i class="fas fa-sun"></i>';}
+        else if(desc.toLowerCase().includes("cloud")||desc.toLowerCase().includes("overcast")){icon.className="weather-icon cloudy";icon.innerHTML='<i class="fas fa-cloud"></i>';}
+        else if(desc.toLowerCase().includes("rain")||desc.toLowerCase().includes("drizzle")||desc.toLowerCase().includes("thunder")){icon.className="weather-icon rainy";icon.innerHTML='<i class="fas fa-cloud-rain"></i>';}
+        else{icon.className="weather-icon cloudy";icon.innerHTML='<i class="fas fa-cloud-sun"></i>';}
+    }catch{
+        document.getElementById("weather-temp").textContent="--";
+        document.getElementById("weather-desc").textContent="Indisponible";
+    }
+}
+/* ══ Room tabs ══ */
+document.addEventListener("DOMContentLoaded",()=>{
+    const tabs=document.querySelectorAll(".room-tab");
+    tabs.forEach(tab=>{
+        tab.addEventListener("click",()=>{
+            tabs.forEach(t=>t.classList.remove("active"));
+            tab.classList.add("active");
+            const room=tab.dataset.room;
+            const kpis=document.querySelectorAll("#overview .kcard");
+            kpis.forEach(k=>{
+                if(room==="all"){k.style.display="block";return;}
+                const id=k.id||"";
+                if(id.includes(room)) k.style.display="block";
+                else k.style.display="none";
+            });
+        });
+    });
+});
+/* ══ Service Worker ══ */
+if("serviceWorker" in navigator){
+    window.addEventListener("load",()=>{
+        navigator.serviceWorker.register("sw.js").catch(()=>{});
+    });
+}
 /* ══ Init ══ */
 function initAccountMenu() {
     const toggle = document.getElementById("account-toggle");
@@ -2531,15 +2891,35 @@ function initAccountMenu() {
     avatarInput.addEventListener("change",handleAvatarUpload);
     avatarRemove.addEventListener("click",removeAccountAvatar);
 }
+async function softCheckAuth(){
+    try{
+        const res=await fetch(`${API_BASE}/auth/me`,{credentials:"include",signal:AbortSignal.timeout(4000)});
+        if(res.ok) return true;
+    }catch{}
+    const local=getLocalSessionUser();
+    return !!local;
+}
 document.addEventListener("DOMContentLoaded",async()=>{
     loadTheme();
+    const loggedIn=await softCheckAuth();
+    if(!loggedIn){
+        document.getElementById("hero-section").classList.remove("hidden");
+        document.getElementById("hero-section").style.display="flex";
+        document.getElementById("app").style.display="none";
+        document.getElementById("welcome-overlay").style.display="none";
+        return;
+    }
+    document.getElementById("hero-section").classList.add("hidden");
+    document.getElementById("hero-section").style.display="none";
+    document.getElementById("app").style.display="flex";
     initAccountMenu();
     initCharts();
-    const loggedIn=await loadUser();
-    if(!loggedIn) return;
+    const loggedInFull=await loadUser();
+    if(!loggedInFull) return;
     setTimeout(async()=>{
         document.getElementById("welcome-overlay").classList.add("hide");
         document.getElementById("app").style.opacity="1";
+        await loadWeather();
         await loadInitial();
         await loadAverages();
         await loadHistory();
