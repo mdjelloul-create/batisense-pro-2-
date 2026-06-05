@@ -1847,6 +1847,7 @@
         html[data-theme="dark"] .threshold-row{color:rgba(247,247,242,.7)!important}
         html[data-theme="dark"] .threshold-row input[type="number"]{background:rgba(255,255,255,.08)!important;border-color:rgba(255,255,255,.13)!important;color:#f7f7f2!important}
         html[data-theme="dark"] .thresholds-wrap p,html[data-theme="dark"] .thresholds-notif label{color:rgba(247,247,242,.62)!important}
+        html[data-theme="dark"] #notif-email-input,html[data-theme="dark"] #notif-sms-input{background:rgba(255,255,255,.08)!important;border-color:rgba(255,255,255,.13)!important;color:#f7f7f2!important}
         html[data-theme="light"] .period-tab{background:rgba(255,255,255,.5)!important;border-color:rgba(0,0,0,.1)!important;color:#24231e!important}
         html[data-theme="light"] .period-tab.active{background:rgba(241,200,75,.3)!important;color:#7a6a19!important}
         html[data-theme="light"] .threshold-card{background:rgba(255,255,255,.7)!important;border-color:rgba(0,0,0,.1)!important}
@@ -1854,6 +1855,7 @@
         html[data-theme="light"] .threshold-row{color:rgba(36,35,30,.7)!important}
         html[data-theme="light"] .threshold-row input[type="number"]{background:rgba(0,0,0,.04)!important;border-color:rgba(0,0,0,.1)!important;color:#24231e!important}
         html[data-theme="light"] .thresholds-wrap p,html[data-theme="light"] .thresholds-notif label{color:rgba(36,35,30,.62)!important}
+        html[data-theme="light"] #notif-email-input,html[data-theme="light"] #notif-sms-input{background:rgba(0,0,0,.04)!important;border-color:rgba(0,0,0,.1)!important;color:#24231e!important}
         .thresholds-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
         .threshold-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:var(--r);padding:16px;box-shadow:var(--card-shadow)}
         .threshold-card h4{font-size:13px;font-weight:800;margin:0 0 10px;color:var(--t0)}
@@ -2297,14 +2299,23 @@
             <div class="thresholds-wrap" id="thresholds-wrap">
                 <p style="font-size:12px;color:var(--t2);margin-bottom:14px">Déclenchez une alerte quand une valeur dépasse le seuil. Les seuils sont sauvegardés localement.</p>
                 <div class="thresholds-grid" id="thresholds-grid"></div>
-                <div class="thresholds-notif" style="margin-top:16px;display:flex;gap:18px;flex-wrap:wrap;align-items:center">
-                    <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--t1);cursor:pointer">
-                        <input type="checkbox" id="notif-email"> <i class="fas fa-envelope" style="color:var(--blue)"></i> Notification par Email
+                <div class="thresholds-notif" style="margin-top:16px;display:flex;gap:14px;flex-wrap:wrap;align-items:end">
+                    <div style="display:flex;flex-direction:column;gap:4px">
+                        <label style="font-size:11px;color:var(--t2);font-weight:600">Email de notification</label>
+                        <input type="email" id="notif-email-input" placeholder="votre@email.com" style="padding:7px 12px;border-radius:8px;border:1px solid var(--b1);background:var(--bg3);color:var(--t0);font-size:12px;font-family:inherit;width:200px">
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:4px">
+                        <label style="font-size:11px;color:var(--t2);font-weight:600">Téléphone (SMS)</label>
+                        <input type="tel" id="notif-sms-input" placeholder="+213 6XX XX XX XX" style="padding:7px 12px;border-radius:8px;border:1px solid var(--b1);background:var(--bg3);color:var(--t0);font-size:12px;font-family:inherit;width:180px">
+                    </div>
+                    <label style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--t1);cursor:pointer;padding-bottom:2px">
+                        <input type="checkbox" id="notif-email-cb"> <i class="fas fa-envelope" style="color:var(--blue);font-size:13px"></i> Email
                     </label>
-                    <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--t1);cursor:pointer">
-                        <input type="checkbox" id="notif-sms"> <i class="fas fa-phone" style="color:var(--green)"></i> Notification par SMS
+                    <label style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--t1);cursor:pointer;padding-bottom:2px">
+                        <input type="checkbox" id="notif-sms-cb"> <i class="fas fa-phone" style="color:var(--green);font-size:13px"></i> SMS
                     </label>
-                    <button class="btn" onclick="saveThresholds()" style="margin-left:auto;padding:7px 18px;font-size:12px"><i class="fas fa-save"></i> Enregistrer les seuils</button>
+                    <button class="btn" onclick="saveThresholds()" style="padding:8px 18px;font-size:12px"><i class="fas fa-save"></i> Enregistrer</button>
+                    <span id="thresh-msg" style="font-size:11px;color:var(--green);opacity:0;transition:opacity .3s">✓ Enregistré</span>
                 </div>
             </div>
         </section>
@@ -3157,10 +3168,14 @@ function renderThresholds(){
         }).join("");
         return `<div class="threshold-card"><h4>${labels[nid]||nid}</h4>${fields}</div>`;
     }).join("");
-    const emailCb=document.getElementById("notif-email");
-    const smsCb=document.getElementById("notif-sms");
+    const emailCb=document.getElementById("notif-email-cb");
+    const smsCb=document.getElementById("notif-sms-cb");
+    const emailInp=document.getElementById("notif-email-input");
+    const smsInp=document.getElementById("notif-sms-input");
     if(emailCb) emailCb.checked=localStorage.getItem("bs_notif_email")==="true";
     if(smsCb) smsCb.checked=localStorage.getItem("bs_notif_sms")==="true";
+    if(emailInp) emailInp.value=localStorage.getItem("bs_notif_email_addr")||"";
+    if(smsInp) smsInp.value=localStorage.getItem("bs_notif_sms_phone")||"";
 }
 function saveThresholds(){
     const t={};
@@ -3176,9 +3191,13 @@ function saveThresholds(){
         });
     });
     localStorage.setItem("bs_thresholds",JSON.stringify(t));
-    localStorage.setItem("bs_notif_email",document.getElementById("notif-email").checked);
-    localStorage.setItem("bs_notif_sms",document.getElementById("notif-sms").checked);
-    alert("Seuils enregistrés ✅");
+    localStorage.setItem("bs_notif_email",document.getElementById("notif-email-cb").checked);
+    localStorage.setItem("bs_notif_sms",document.getElementById("notif-sms-cb").checked);
+    localStorage.setItem("bs_notif_email_addr",document.getElementById("notif-email-input").value.trim());
+    localStorage.setItem("bs_notif_sms_phone",document.getElementById("notif-sms-input").value.trim());
+    const msg=document.getElementById("thresh-msg");
+    msg.style.opacity="1";
+    setTimeout(()=>msg.style.opacity="0",2000);
 }
 function checkThresholds(nid,sensor,value){
     const t=getThresholds();
@@ -3202,7 +3221,16 @@ function checkThresholds(nid,sensor,value){
         list.prepend(el);
         const notifEmail=localStorage.getItem("bs_notif_email")==="true";
         const notifSms=localStorage.getItem("bs_notif_sms")==="true";
-        if(notifEmail&&"Notification" in window) try{new Notification("BatiSense - Seuil dépassé",{body:msg});}catch{}
+        const emailAddr=localStorage.getItem("bs_notif_email_addr")||"";
+        const smsPhone=localStorage.getItem("bs_notif_sms_phone")||"";
+        if(notifEmail&&emailAddr){
+            try{fetch(`${API_BASE}/api/send-notification`,{method:"POST",headers:{"Content-Type":"application/json"},credentials:"include",body:JSON.stringify({type:"email",to:emailAddr,subject:"BatiSense - Seuil dépassé",message:msg})}).catch(()=>{});}catch{}
+        }
+        if(notifSms&&smsPhone){
+            try{fetch(`${API_BASE}/api/send-notification`,{method:"POST",headers:{"Content-Type":"application/json"},credentials:"include",body:JSON.stringify({type:"sms",to:smsPhone,message:msg})}).catch(()=>{});}catch{}
+        }
+        if("Notification"in window&&Notification.permission==="granted") try{new Notification("BatiSense - Seuil dépassé",{body:msg});}catch{}
+        else if("Notification"in window&&Notification.permission!=="denied") Notification.requestPermission();
     }
 }
 document.addEventListener("DOMContentLoaded",()=>{renderThresholds();});
