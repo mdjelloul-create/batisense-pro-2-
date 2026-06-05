@@ -1830,6 +1830,31 @@
         .room-tab:hover{background:rgba(255,255,255,.12);color:#fff}
         .room-tab.active{background:rgba(241,200,75,.2);border-color:rgba(241,200,75,.4);color:#f4c84d}
         .room-tab i{margin-right:5px}
+
+        /* ═══════════════ PERIOD TABS & THRESHOLDS ═══════════════ */
+        .period-tab{
+            padding:7px 16px;border-radius:999px;border:1px solid rgba(255,255,255,.15);
+            background:rgba(255,255,255,.06);color:rgba(255,255,255,.7);font-size:12px;font-weight:700;
+            cursor:pointer;transition:all .2s;font-family:Inter,sans-serif;
+        }
+        .period-tab:hover{background:rgba(255,255,255,.12);color:#fff}
+        .period-tab.active{background:rgba(241,200,75,.2);border-color:rgba(241,200,75,.4);color:#f4c84d}
+        .period-tab i{margin-right:5px}
+        html[data-theme="dark"] .period-tab{background:rgba(255,255,255,.08)!important;color:rgba(247,247,242,.7)!important}
+        html[data-theme="dark"] .period-tab.active{background:rgba(241,200,75,.2)!important;color:#f4c84d!important}
+        html[data-theme="light"] .period-tab{background:rgba(255,255,255,.5)!important;border-color:rgba(0,0,0,.1)!important;color:#24231e!important}
+        html[data-theme="light"] .period-tab.active{background:rgba(241,200,75,.3)!important;color:#7a6a19!important}
+        .thresholds-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+        .threshold-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:var(--r);padding:16px;box-shadow:var(--card-shadow)}
+        .threshold-card h4{font-size:13px;font-weight:800;margin:0 0 10px;color:var(--t0)}
+        .threshold-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;font-size:11px;color:var(--t1)}
+        .threshold-row label{display:flex;align-items:center;gap:6px;flex:1}
+        .threshold-row input[type="number"]{
+            width:68px;padding:4px 8px;border-radius:6px;border:1px solid var(--b1);
+            background:var(--bg3);color:var(--t0);font-size:11px;font-weight:600;font-family:inherit;text-align:center;
+        }
+        .threshold-row input[type="number"]:focus{border-color:var(--green);outline:none}
+        .thresholds-wrap{margin-top:4px}
         .app.hidden{display:none!important}
         .app.visible{display:grid!important}
 
@@ -2227,7 +2252,12 @@
 
         <!-- ═══ CONSUMPTION ═══ -->
         <section id="consumption" class="sec">
-            <div class="sh"><h2>📊 Consommation journalière</h2></div>
+            <div class="sh"><h2>📊 Consommation</h2></div>
+            <div class="period-tabs" id="period-tabs" style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+                <button class="period-tab active" data-period="day"><i class="fas fa-calendar-day"></i> Jour</button>
+                <button class="period-tab" data-period="week"><i class="fas fa-calendar-week"></i> Semaine</button>
+                <button class="period-tab" data-period="month"><i class="fas fa-calendar-alt"></i> Mois</button>
+            </div>
             <div class="g3" style="margin-bottom:18px">
                 <div class="cons-card water tilt-card" id="cons-water-card"><div class="tilt-card-inner">
                     <div class="cons-ico"><i class="fas fa-faucet-drip"></i></div>
@@ -2253,6 +2283,20 @@
         <section id="alerts" class="sec">
             <div class="sh"><h2>🔔 Alertes</h2></div>
             <div class="alert-list" id="alert-list"><div class="empty"><i class="fas fa-spinner fa-spin"></i></div></div>
+            <div class="sh" style="margin-top:28px"><h2>⚙️ Seuils d'alerte</h2></div>
+            <div class="thresholds-wrap" id="thresholds-wrap">
+                <p style="font-size:12px;color:var(--t2);margin-bottom:14px">Déclenchez une alerte quand une valeur dépasse le seuil. Les seuils sont sauvegardés localement.</p>
+                <div class="thresholds-grid" id="thresholds-grid"></div>
+                <div class="thresholds-notif" style="margin-top:16px;display:flex;gap:18px;flex-wrap:wrap;align-items:center">
+                    <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--t1);cursor:pointer">
+                        <input type="checkbox" id="notif-email"> <i class="fas fa-envelope" style="color:var(--blue)"></i> Notification par Email
+                    </label>
+                    <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--t1);cursor:pointer">
+                        <input type="checkbox" id="notif-sms"> <i class="fas fa-phone" style="color:var(--green)"></i> Notification par SMS
+                    </label>
+                    <button class="btn" onclick="saveThresholds()" style="margin-left:auto;padding:7px 18px;font-size:12px"><i class="fas fa-save"></i> Enregistrer les seuils</button>
+                </div>
+            </div>
         </section>
     </div>
 </div>
@@ -2267,6 +2311,8 @@ const LOGIN_URL = location.protocol === "file:" || location.pathname.endsWith(".
 const LOCAL_ACCOUNT_KEY = "bs_local_account";
 const LOCAL_SESSION_KEY = "bs_local_session";
 const HISTORY_HOURS = 24;
+const PERIODS = {day:24, week:168, month:720};
+let currentPeriod = "day";
 
 const NODES = {
     kitchen:     { label:"Cuisine",     icon:"fa-utensils",  color:"var(--green)",  sensors:["temperature","humidity","gas_detected","presence"] },
@@ -2550,20 +2596,24 @@ async function loadAverages() {
     state.averages = data;
     renderAverages();
 }
-async function loadHistory() {
+async function loadHistory(hours) {
+    hours = hours || HISTORY_HOURS;
     const [kt,st,kh,sh,kp,w,e,g] = await Promise.all([
         apiFetch(`/api/history?node_id=kitchen&sensor_type=temperature&hours=${HISTORY_HOURS}`),
         apiFetch(`/api/history?node_id=salon&sensor_type=temperature&hours=${HISTORY_HOURS}`),
         apiFetch(`/api/history?node_id=kitchen&sensor_type=humidity&hours=${HISTORY_HOURS}`),
         apiFetch(`/api/history?node_id=salon&sensor_type=humidity&hours=${HISTORY_HOURS}`),
         apiFetch(`/api/history?node_id=kitchen&sensor_type=presence&hours=${HISTORY_HOURS}`),
-        apiFetch(`/api/history?node_id=water&sensor_type=daily_consumption&hours=${HISTORY_HOURS}`),
-        apiFetch(`/api/history?node_id=electricity&sensor_type=daily_consumption&hours=${HISTORY_HOURS}`),
-        apiFetch(`/api/history?node_id=gas_node&sensor_type=daily_consumption&hours=${HISTORY_HOURS}`),
+        apiFetch(`/api/history?node_id=water&sensor_type=daily_consumption&hours=${hours}`),
+        apiFetch(`/api/history?node_id=electricity&sensor_type=daily_consumption&hours=${hours}`),
+        apiFetch(`/api/history?node_id=gas_node&sensor_type=daily_consumption&hours=${hours}`),
     ]);
     updateTempChart(kt,st);
     if(CH.hum){CH.hum.data.datasets=[mkDS("Cuisine","var(--green)",toXY(kh)),mkDS("Salon","var(--teal)",toXY(sh))];CH.hum.update("none");}
     if(CH.presence){CH.presence.data.datasets=[mkDS("Cuisine","var(--amber)",toXY(kp),true)];CH.presence.update("none");}
+    updateConsumptionCharts(w,e,g);
+}
+function updateConsumptionCharts(w,e,g){
     if(CH.water){CH.water.data.datasets=[mkBarDS("Eau","var(--teal)",toXY(w))];CH.water.update("none");}
     if(CH.elec){CH.elec.data.datasets=[mkDS("Élec.","var(--violet)",toXY(e))];CH.elec.update("none");}
     if(CH.gas){CH.gas.data.datasets=[mkDS("Gaz","var(--amber)",toXY(g))];CH.gas.update("none");}
@@ -2621,6 +2671,7 @@ function onSensorEvent(d) {
     if(nid==="electricity"&&sensor_type==="daily_consumption"){appendChartPoint("elec","Élec.","var(--violet)",pt);flashEl("cons-elec-card");document.getElementById("cons-elec").textContent=value.toFixed(2);}
     if(nid==="gas_node"&&sensor_type==="daily_consumption"){appendChartPoint("gas","Gaz","var(--amber)",pt);flashEl("cons-gas-card");document.getElementById("cons-gas").textContent=value.toFixed(3);}
     if((nid==="kitchen"||nid==="salon")&&(sensor_type==="temperature"||sensor_type==="humidity")) recalcAverages();
+    checkThresholds(nid,sensor_type,value);
 }
 function onAlertEvent(d) {
     state.alertCount++; updateAlertBadge();
@@ -3056,6 +3107,95 @@ document.addEventListener("DOMContentLoaded",()=>{
         });
     });
 });
+/* ══ Consumption period tabs ══ */
+document.addEventListener("DOMContentLoaded",()=>{
+    document.getElementById("period-tabs").addEventListener("click",e=>{
+        const tab=e.target.closest(".period-tab");
+        if(!tab) return;
+        document.querySelectorAll(".period-tab").forEach(t=>t.classList.remove("active"));
+        tab.classList.add("active");
+        currentPeriod=tab.dataset.period;
+        const hours=PERIODS[currentPeriod];
+        const lbl={day:"journalière",week:"hebdomadaire",month:"mensuelle"}[currentPeriod];
+        loadHistory(hours);
+    });
+});
+/* ══ Alert thresholds ══ */
+const DEFAULT_THRESHOLDS={
+    kitchen:{temperature:{max:35,min:5},humidity:{max:80},gas_detected:{max:1}},
+    salon:{temperature:{max:35,min:5},humidity:{max:80},gas_detected:{max:1}},
+    port:{door_open:{max:1},presence:{max:1},structure_alert:{max:1}},
+    room:{presence:{max:1},luminosity:{min:0},structure_alert:{max:1}}
+};
+function getThresholds(){
+    try{return JSON.parse(localStorage.getItem("bs_thresholds"))||DEFAULT_THRESHOLDS;}catch{return DEFAULT_THRESHOLDS;}
+}
+function renderThresholds(){
+    const grid=document.getElementById("thresholds-grid");
+    if(!grid) return;
+    const t=getThresholds();
+    const labels={kitchen:"🍳 Cuisine",salon:"🛋️ Salon",port:"🚪 Porte",room:"🛏️ Chambre"};
+    const sensorLabels={temperature:"Temp. (°C)",humidity:"Humidité (%)",gas_detected:"Gaz (détecté)",door_open:"Porte (ouverte)",presence:"Présence",luminosity:"Luminosité (lux)",structure_alert:"Alerte structure"};
+    grid.innerHTML=Object.keys(DEFAULT_THRESHOLDS).map(nid=>{
+        const nodeT=t[nid]||DEFAULT_THRESHOLDS[nid];
+        let fields=Object.entries(nodeT).map(([sensor,ranges])=>{
+            const sl=sensorLabels[sensor]||sensor;
+            return Object.entries(ranges).map(([type,val])=>{
+                const lbl=type==="max"?"Max":"Min";
+                return `<div class="threshold-row"><label>${sl} (${lbl}): <input type="number" class="thresh-input" data-node="${nid}" data-sensor="${sensor}" data-type="${type}" value="${val}"></label></div>`;
+            }).join("");
+        }).join("");
+        return `<div class="threshold-card"><h4>${labels[nid]||nid}</h4>${fields}</div>`;
+    }).join("");
+    const emailCb=document.getElementById("notif-email");
+    const smsCb=document.getElementById("notif-sms");
+    if(emailCb) emailCb.checked=localStorage.getItem("bs_notif_email")==="true";
+    if(smsCb) smsCb.checked=localStorage.getItem("bs_notif_sms")==="true";
+}
+function saveThresholds(){
+    const t={};
+    document.querySelectorAll(".threshold-card").forEach(card=>{
+        const firstInput=card.querySelector(".thresh-input");
+        if(!firstInput) return;
+        const nid=firstInput.dataset.node;
+        t[nid]={};
+        card.querySelectorAll(".thresh-input").forEach(inp=>{
+            const{sensor,type}=inp.dataset;
+            if(!t[nid][sensor]) t[nid][sensor]={};
+            t[nid][sensor][type]=parseFloat(inp.value)||0;
+        });
+    });
+    localStorage.setItem("bs_thresholds",JSON.stringify(t));
+    localStorage.setItem("bs_notif_email",document.getElementById("notif-email").checked);
+    localStorage.setItem("bs_notif_sms",document.getElementById("notif-sms").checked);
+    alert("Seuils enregistrés ✅");
+}
+function checkThresholds(nid,sensor,value){
+    const t=getThresholds();
+    const nodeT=t[nid];
+    if(!nodeT) return;
+    const sensorT=nodeT[sensor];
+    if(!sensorT) return;
+    const violated=[];
+    if(sensorT.max!=null&&value>sensorT.max) violated.push(`max (${sensorT.max})`);
+    if(sensorT.min!=null&&value<sensorT.min) violated.push(`min (${sensorT.min})`);
+    if(violated.length){
+        const labels={kitchen:"Cuisine",salon:"Salon",port:"Porte",room:"Chambre"};
+        const sensorLabels={temperature:"Température",humidity:"Humidité",gas_detected:"Gaz",door_open:"Porte",presence:"Présence",luminosity:"Luminosité",structure_alert:"Alerte structure"};
+        const msg=`${labels[nid]||nid} — ${sensorLabels[sensor]||sensor}: ${value} (seuil ${violated.join(", ")})`;
+        state.alertCount++; updateAlertBadge();
+        const list=document.getElementById("alert-list");
+        const el=document.createElement("div");
+        el.className="al danger";
+        el.innerHTML=`<i class="fas fa-exclamation-circle al-icon"></i><div class="al-body"><div class="al-title">⚠️ Seuil dépassé — ${labels[nid]||nid}</div><div class="al-msg">${msg}</div><div class="al-ts">${new Date().toLocaleString("fr-FR")}</div></div><button class="btn-ack" onclick="this.closest('.al').remove();state.alertCount=Math.max(0,state.alertCount-1);updateAlertBadge();">Acquitter</button>`;
+        const empty=list.querySelector(".empty"); if(empty) empty.remove();
+        list.prepend(el);
+        const notifEmail=localStorage.getItem("bs_notif_email")==="true";
+        const notifSms=localStorage.getItem("bs_notif_sms")==="true";
+        if(notifEmail&&"Notification" in window) try{new Notification("BatiSense - Seuil dépassé",{body:msg});}catch{}
+    }
+}
+document.addEventListener("DOMContentLoaded",()=>{renderThresholds();});
 /* ══ PWA Install ══ */
 let installPrompt=null;
 window.addEventListener("beforeinstallprompt",e=>{
