@@ -1693,12 +1693,12 @@
             display:flex;align-items:center;gap:16px;padding:16px 20px;
             border-radius:18px;border:1px solid rgba(255,255,255,.13);
             backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
-            position:relative;overflow:hidden;
+            position:relative;
             transition:background .6s ease;
         }
         .weather-widget::before{
             content:"";position:absolute;inset:0;border-radius:18px;
-            opacity:.45;transition:opacity .6s ease;z-index:0;
+            opacity:.45;transition:opacity .6s ease;z-index:0;pointer-events:none;
         }
         .weather-widget.sunny{background:linear-gradient(135deg,rgba(244,200,77,.15),rgba(244,200,77,.04))}
         .weather-widget.sunny::before{background:linear-gradient(135deg,rgba(244,200,77,.3),transparent 70%)}
@@ -1731,10 +1731,11 @@
         .weather-detail-item i{font-size:10px;width:14px;text-align:center;opacity:.7}
         .weather-location{position:relative}
         .city-search-wrap{
-            position:absolute;top:calc(100% + 6px);left:0;right:0;z-index:100;
+            position:absolute;top:100%;left:0;right:0;z-index:100;
             background:rgba(28,28,24,.97);border:1px solid rgba(255,255,255,.13);
             border-radius:12px;padding:8px;backdrop-filter:blur(16px);
             display:none;box-shadow:0 8px 30px rgba(0,0,0,.4);
+            margin-top:2px;
         }
         .city-search-wrap.open{display:block}
         .city-search-input{
@@ -2056,10 +2057,10 @@
                                 <span class="weather-detail-item" id="weather-desc"><i class="fas fa-cloud-sun"></i> Chargement…</span>
                             </div>
                         </div>
-                    </div>
                     <div class="city-search-wrap" id="city-search">
                         <input type="text" class="city-search-input" id="city-search-input" placeholder="Rechercher une ville…" autocomplete="off">
                         <ul class="city-results" id="city-results"></ul>
+                    </div>
                     </div>
                     <div class="panel" style="margin-bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:150px;position:relative;">
                     <div class="pt" style="margin-bottom:0;font-size:10px;color:var(--t2);position:absolute;top:12px;left:16px;"><i class="fas fa-cube"></i> Modèle 3D interactif</div>
