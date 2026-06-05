@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>BatiSense Pro - Connexion</title>
-<link rel="icon" type="image/svg+xml" href="batisense-icon.svg">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Crect width='48' height='48' rx='10' fill='%23050810'/%3E%3Cpolygon points='24,6 40,22 40,40 8,40 8,22' fill='none' stroke='%2300f5a0' stroke-width='3' stroke-linejoin='round'/%3E%3Ccircle cx='24' cy='30' r='4' fill='%2300f5a0'/%3E%3Ccircle cx='24' cy='10' r='3' fill='%2300d4e0'/%3E%3Cpath d='M20,30 L24,24 L28,30' fill='none' stroke='%2300f5a0' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Syne:wght@600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -90,13 +90,12 @@ button{font-family:var(--fui);cursor:pointer}
   border-radius:24px;
   display:grid;
   place-items:center;
-  padding:7px;
-  background:rgba(13,20,36,.92);
-  border:1px solid rgba(0,245,160,.22);
-  box-shadow:0 22px 55px rgba(0,0,0,.30),0 0 34px rgba(0,212,224,.24);
+  background:var(--amber);
+  color:#24231e;
+  box-shadow:0 22px 55px rgba(0,0,0,.30);
   animation:wovLogoIn .9s cubic-bezier(.34,1.56,.64,1) both;
 }
-.wov-logo img{width:100%;height:100%;display:block;object-fit:contain;border-radius:18px}
+.wov-logo::before{content:"\f015";font-family:"Font Awesome 6 Free";font-weight:900;font-size:30px}
 .wov-text{font-size:34px;font-weight:900;letter-spacing:-.04em;color:#fff;animation:wovTextIn .6s ease both .25s}
 .wov-user{font-size:15px;color:rgba(255,255,255,.68);animation:wovTextIn .6s ease both .4s}
 .wov-bar-wrap{width:240px;animation:wovTextIn .6s ease both .55s}
@@ -136,15 +135,14 @@ button{font-family:var(--fui);cursor:pointer}
 .s-logo{
   width:50px;
   height:50px;
-  border-radius:16px;
+  border-radius:50%;
   display:grid;
   place-items:center;
-  padding:0;
-  background:rgba(13,20,36,.94);
-  box-shadow:0 12px 24px rgba(0,0,0,.16),0 0 0 1px rgba(0,245,160,.18);
-  overflow:hidden;
+  background:#f3f1e7;
+  color:#25241f;
+  box-shadow:inset 0 0 0 6px rgba(142,207,123,.26),0 12px 24px rgba(0,0,0,.12);
 }
-.s-logo img{width:100%;height:100%;display:block;object-fit:contain;border-radius:16px}
+.s-logo::before{content:"\f015";font-family:"Font Awesome 6 Free";font-weight:900;font-size:18px}
 .s-nav{display:flex;flex-direction:column;align-items:center;gap:11px;width:100%}
 .nav-btn{
   width:50px;
@@ -429,7 +427,7 @@ input:focus{border-color:rgba(244,200,77,.88);box-shadow:0 0 0 4px rgba(244,200,
 </head>
 <body>
 <div id="welcome-overlay">
-  <div class="wov-logo"><img src="batisense-icon.svg" alt="BatiSense Pro"></div>
+  <div class="wov-logo"></div>
   <div class="wov-text">BatiSense Pro</div>
   <div class="wov-user">Connexion au dashboard</div>
   <div class="wov-bar-wrap">
@@ -440,7 +438,7 @@ input:focus{border-color:rgba(244,200,77,.88);box-shadow:0 0 0 4px rgba(244,200,
 
 <div class="app" id="app" style="opacity:0;transition:opacity .6s ease">
   <aside class="sidebar" aria-label="Navigation">
-    <div class="s-logo" title="BatiSense Pro"><img src="batisense-icon.svg" alt=""></div>
+    <div class="s-logo" title="BatiSense Pro"></div>
     <nav class="s-nav">
       <a class="nav-btn active" href="#" title="Connexion"><i class="fas fa-right-to-bracket"></i></a>
       <a class="nav-btn" href="#" title="Capteurs"><i class="fas fa-microchip"></i></a>

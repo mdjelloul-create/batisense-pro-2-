@@ -119,16 +119,6 @@
         #welcome-overlay.hide{animation:overlayOut .7s cubic-bezier(.76,0,.24,1) forwards;pointer-events:none}
         @keyframes overlayOut{0%{opacity:1;transform:scale(1)}30%{opacity:1;transform:scale(1.02)}100%{opacity:0;transform:scale(.95);display:none}}
         .wov-logo{animation:wovLogoIn .9s cubic-bezier(.34,1.56,.64,1) both;filter:drop-shadow(0 0 40px rgba(0,245,160,.3))}
-        .wov-logo img{width:100%;height:100%;display:block;object-fit:contain;border-radius:18px}
-        .wov-logo svg,.wov-logo::before{display:none}
-        .wov-wordmark{
-            width:min(270px,72vw);
-            height:auto;
-            display:block;
-            border-radius:16px;
-            box-shadow:0 24px 60px rgba(0,0,0,.28),0 0 36px rgba(0,212,224,.16);
-            animation:wovTextIn .6s ease both .25s;
-        }
         @keyframes wovLogoIn{from{opacity:0;transform:scale(.3) rotateY(-180deg)}to{opacity:1;transform:scale(1) rotateY(0deg)}}
         .wov-text{font-family:var(--fui);font-size:34px;font-weight:800;letter-spacing:-1px;background:linear-gradient(90deg,var(--green),var(--teal),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:wovTextIn .6s ease both .3s}
         @keyframes wovTextIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
@@ -153,7 +143,7 @@
         }
         .s-logo{padding:20px 18px 16px;border-bottom:1px solid var(--b0);display:flex;align-items:center;gap:12px;transition:border-color .4s}
         .s-logo-mark{width:38px;height:38px;border-radius:10px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:var(--bg3);box-shadow:0 0 20px rgba(0,245,160,.2);overflow:hidden}
-        .s-logo-mark img{width:100%;height:100%;display:block;object-fit:cover;border-radius:10px}
+        .s-logo-mark svg{width:38px;height:38px;border-radius:10px}
         .s-logo-name{font-family:var(--fui);font-size:16px;font-weight:800;letter-spacing:-.5px;background:linear-gradient(90deg,var(--t0),var(--t1));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
         .s-logo-sub{font-size:10px;color:var(--green);text-transform:uppercase;letter-spacing:2px;font-family:var(--fmono);opacity:.85}
         .s-nav{padding:10px 8px;flex:1}
@@ -460,13 +450,12 @@
             border-radius:24px;
             display:grid;
             place-items:center;
-            padding:7px;
-            background:rgba(13,20,36,.92);
-            border:1px solid rgba(0,245,160,.22);
-            box-shadow:0 22px 55px rgba(0,0,0,.30),0 0 34px rgba(0,212,224,.24);
+            background:var(--amber);
+            color:#24231e;
+            box-shadow:0 22px 55px rgba(0,0,0,.30);
         }
-        .wov-logo img{width:100%;height:100%;display:block;object-fit:contain;border-radius:18px}
-        .wov-logo svg,.wov-logo::before{display:none}
+        .wov-logo svg{display:none}
+        .wov-logo::before{content:"\f015";font-family:"Font Awesome 6 Free";font-weight:900;font-size:30px}
         .wov-text{-webkit-text-fill-color:currentColor;background:none;color:#fff;font-family:Inter,sans-serif;letter-spacing:-.04em}
         .wov-bar-fill{background:var(--amber)}
         .app{
@@ -510,10 +499,17 @@
             place-items:center;
             background:transparent;
             box-shadow:none;
-            border-radius:16px;
+            border-radius:50%;
         }
-        .s-logo-mark img{width:100%;height:100%;display:block;object-fit:contain;border-radius:16px}
-        .s-logo-mark svg,.s-logo-mark::before,.s-logo-name,.s-logo-sub,.s-nav-sec,.nav-btn span,.conn span{display:none}
+        .s-logo-mark svg,.s-logo-name,.s-logo-sub,.s-nav-sec,.nav-btn span,.conn span{display:none}
+        .s-logo-mark::before{
+            content:"\f015";
+            font-family:"Font Awesome 6 Free";
+            font-weight:900;
+            font-size:18px;
+            line-height:1;
+            display:block;
+        }
         .s-nav{display:flex;flex-direction:column;align-items:center;gap:11px;width:100%;padding:0;flex:0 0 auto}
         .nav-btn{
             width:50px;
@@ -1607,9 +1603,27 @@
 <!-- ═══════════════ WELCOME OVERLAY ═══════════════ -->
 <div id="welcome-overlay">
     <div class="wov-logo">
-        <img src="batisense-icon.svg" alt="BatiSense Pro">
+        <svg width="90" height="90" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <linearGradient id="wgMark" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#00f5a0"/><stop offset="60%" stop-color="#00d4e0"/><stop offset="100%" stop-color="#4d8dff"/>
+                </linearGradient>
+                <filter id="wglow"><feGaussianBlur stdDeviation="4" result="cb"/><feMerge><feMergeNode in="cb"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                <filter id="wsglow"><feGaussianBlur stdDeviation="12" result="cb"/><feMerge><feMergeNode in="cb"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            </defs>
+            <rect width="120" height="120" rx="24" fill="rgba(13,20,36,.85)"/>
+            <rect width="120" height="120" rx="24" fill="none" stroke="rgba(0,245,160,0.2)" stroke-width="2"/>
+            <ellipse cx="60" cy="60" rx="48" ry="45" fill="rgba(0,245,160,0.08)" filter="url(#wsglow)"/>
+            <polygon points="60,14 100,48 100,98 20,98 20,48" fill="none" stroke="url(#wgMark)" stroke-width="3.5" stroke-linejoin="round" filter="url(#wglow)"/>
+            <circle cx="60" cy="14" r="5" fill="url(#wgMark)" filter="url(#wglow)"/>
+            <rect x="44" y="66" width="32" height="32" rx="16" fill="none" stroke="url(#wgMark)" stroke-width="3" opacity="0.95"/>
+            <circle cx="60" cy="50" r="6" fill="url(#wgMark)" filter="url(#wglow)"/>
+            <path d="M 45,40 Q 60,26 75,40" fill="none" stroke="url(#wgMark)" stroke-width="3" stroke-linecap="round" opacity="0.8" filter="url(#wglow)"/>
+            <path d="M 35,31 Q 60,13 85,31" fill="none" stroke="url(#wgMark)" stroke-width="2.5" stroke-linecap="round" opacity="0.45"/>
+            <path d="M 25,22 Q 60,0 95,22" fill="none" stroke="url(#wgMark)" stroke-width="2" stroke-linecap="round" opacity="0.22"/>
+        </svg>
     </div>
-    <img class="wov-wordmark" src="batisense-logo.svg" alt="BatiSense Pro">
+    <div class="wov-text">BatiSense Pro</div>
     <div class="wov-user" id="wov-user-text">Chargement…</div>
     <div class="wov-bar-wrap">
         <div class="wov-bar"><div class="wov-bar-fill"></div></div>
@@ -1623,7 +1637,25 @@
 <aside class="sidebar">
     <div class="s-logo">
         <div class="s-logo-mark">
-            <img src="batisense-icon.svg" alt="">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="38" height="38">
+                <defs>
+                    <linearGradient id="gMark" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#00f5a0"/><stop offset="60%" stop-color="#00d4e0"/><stop offset="100%" stop-color="#4d8dff"/>
+                    </linearGradient>
+                    <filter id="glow2"><feGaussianBlur stdDeviation="3" result="cb"/><feMerge><feMergeNode in="cb"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                </defs>
+                <rect width="120" height="120" rx="24" fill="var(--bg3)"/>
+                <rect width="120" height="120" rx="24" fill="none" stroke="rgba(0,245,160,0.22)" stroke-width="2"/>
+                <ellipse cx="60" cy="60" rx="44" ry="40" fill="rgba(0,245,160,0.06)"/>
+                <polygon points="60,16 98,48 98,98 22,98 22,48" fill="none" stroke="url(#gMark)" stroke-width="3.5" stroke-linejoin="round" filter="url(#glow2)"/>
+                <circle cx="60" cy="16" r="4.5" fill="url(#gMark)" filter="url(#glow2)"/>
+                <rect x="44" y="66" width="32" height="32" rx="16" fill="none" stroke="url(#gMark)" stroke-width="3" opacity="0.95"/>
+                <circle cx="60" cy="52" r="5.5" fill="url(#gMark)" filter="url(#glow2)"/>
+                <path d="M 46,42 Q 60,28 74,42" fill="none" stroke="url(#gMark)" stroke-width="2.8" stroke-linecap="round" opacity="0.8" filter="url(#glow2)"/>
+                <path d="M 37,34 Q 60,15 83,34" fill="none" stroke="url(#gMark)" stroke-width="2.2" stroke-linecap="round" opacity="0.5"/>
+                <path d="M14,98 L14,110 L26,110" fill="none" stroke="rgba(0,245,160,0.45)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M106,98 L106,110 L94,110" fill="none" stroke="rgba(0,245,160,0.45)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
         </div>
         <div><div class="s-logo-name">BatiSense</div><div class="s-logo-sub">Pro</div></div>
     </div>
